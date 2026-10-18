@@ -1,0 +1,108 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+  APP_NAME: Kinebilan
+  APP_DISPLAY_NAME: KinéBilan
+  BUNDLE_ID: fr.ateno.kinebilan
+
+jobs:
+  windows:
+    name: Windows x64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build release binary
+        run: cargo build --release --locked --target x86_64-pc-windows-msvc
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item target/x86_64-pc-windows-msvc/release/kinebilan.exe dist/
+          Compress-Archive -Path dist/kinebilan.exe -DestinationPath ${{ env.APP_NAME }}-windows-x64.zip
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.APP_NAME }}-windows-x64
+          path: ${{ env.APP_NAME }}-windows-x64.zip
+          if-no-files-found: error
+
+  macos:
+    name: macOS universal
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build release binaries (arm64 and x86_64)
+        run: |
+          cargo build --release --locked --target aarch64-apple-darwin
+          cargo build --release --locked --target x86_64-apple-darwin
+
+      - name: Create universal binary and app bundle
+        run: |
+          VERSION=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          BIN_NAME=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]')
+          APP_DIR="dist/${APP_NAME}.app"
+          mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
+
+          lipo -create \
+            "target/aarch64-apple-darwin/release/${BIN_NAME}" \
+            "target/x86_64-apple-darwin/release/${BIN_NAME}" \
+            -output "$APP_DIR/Contents/MacOS/${APP_NAME}"
+          chmod +x "$APP_DIR/Contents/MacOS/${APP_NAME}"
+          lipo -info "$APP_DIR/Contents/MacOS/${APP_NAME}"
+
+          cat > "$APP_DIR/Contents/Info.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key><string>${APP_DISPLAY_NAME}</string>
+            <key>CFBundleDisplayName</key><string>${APP_DISPLAY_NAME}</string>
+            <key>CFBundleExecutable</key><string>${APP_NAME}</string>
+            <key>CFBundleIdentifier</key><string>${BUNDLE_ID}</string>
+            <key>CFBundleVersion</key><string>${VERSION}</string>
+            <key>CFBundleShortVersionString</key><string>${VERSION}</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>LSMinimumSystemVersion</key><string>11.0</string>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict>
+          </plist>
+          EOF
+
+          # Ad-hoc signature so the bundle launches on Apple Silicon.
+          codesign --force --deep --sign - "$APP_DIR"
+
+      - name: Create DMG
+        run: |
+          STAGING=dmg-staging
+          mkdir -p "$STAGING"
+          cp -R "dist/${APP_NAME}.app" "$STAGING/"
+          ln -s /Applications "$STAGING/Applications"
+          hdiutil create -volname "${APP_DISPLAY_NAME}" -srcfolder "$STAGING" \
+            -ov -format UDZO "${APP_NAME}-macos-universal.dmg"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.APP_NAME }}-macos-universal
+          path: ${{ env.APP_NAME }}-macos-universal.dmg
+          if-no-files-found: error
