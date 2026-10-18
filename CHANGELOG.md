@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.0.1...kinebilan-v0.1.0) (2026-10-18)
+
+
+### Features
+
+* use SDL ([#5](https://github.com/digiz3d/kinebilan/issues/5)) ([5f83df3](https://github.com/digiz3d/kinebilan/commit/5f83df3ec354cffc7cc538ddfb15c0e89c9a36bc))
+
+
+### Bug Fixes
+
+* show caret when clicking input ([3734ab2](https://github.com/digiz3d/kinebilan/commit/3734ab2087e5d0ecbf8cf5fc8638530f3b55e22b))
+* use proper windows subsystem ([93eb28b](https://github.com/digiz3d/kinebilan/commit/93eb28b2164ff0cef9798056d2f7b521810ecdb4))
+* wrong version on ci ([0392ac7](https://github.com/digiz3d/kinebilan/commit/0392ac7d98e724aa8c0697759532e98c43eca21e))
+
 ## 0.0.1 (2026-10-18)
 
 
