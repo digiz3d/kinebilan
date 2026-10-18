@@ -1,6 +1,5 @@
 use argon2::Argon2;
-use chacha20poly1305::aead::rand_core::RngCore;
-use chacha20poly1305::aead::{Aead, KeyInit, OsRng, Payload};
+use chacha20poly1305::aead::{Aead, Generate, KeyInit, Payload};
 use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 
 pub const SALT_LEN: usize = 16;
@@ -16,20 +15,18 @@ pub fn derive_key(password: &str, salt: &[u8; SALT_LEN]) -> Result<Key, String> 
 }
 
 pub fn random_bytes<const N: usize>() -> [u8; N] {
-    let mut bytes = [0u8; N];
-    OsRng.fill_bytes(&mut bytes);
-    bytes
+    <[u8; N]>::generate()
 }
 
 pub fn seal(key: &Key, nonce: &[u8; NONCE_LEN], aad: &[u8], plaintext: &[u8]) -> Result<Vec<u8>, String> {
     XChaCha20Poly1305::new(key.into())
-        .encrypt(XNonce::from_slice(nonce), Payload { msg: plaintext, aad })
+        .encrypt(&XNonce::from(*nonce), Payload { msg: plaintext, aad })
         .map_err(|error| error.to_string())
 }
 
 pub fn open(key: &Key, nonce: &[u8; NONCE_LEN], aad: &[u8], ciphertext: &[u8]) -> Result<Vec<u8>, String> {
     XChaCha20Poly1305::new(key.into())
-        .decrypt(XNonce::from_slice(nonce), Payload { msg: ciphertext, aad })
+        .decrypt(&XNonce::from(*nonce), Payload { msg: ciphertext, aad })
         .map_err(|error| error.to_string())
 }
 
