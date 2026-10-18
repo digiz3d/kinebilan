@@ -66,7 +66,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         input.mouse = mouse;
-        input.caret_on = (started.elapsed().as_millis() / 500) % 2 == 0;
+        input.caret_on = (started.elapsed().as_millis() / 500).is_multiple_of(2);
 
         let (width, height) = canvas.output_size()?;
         let screen = Rect::new(0, 0, width as i32, height as i32);

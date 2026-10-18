@@ -7,8 +7,8 @@ edition = "2024"
 sdl3 = { version = "0.20", features = ["build-from-source-static", "ttf"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1", features = ["v4", "serde"] }
+chrono = "0.4"
+uuid = { version = "1", features = ["v4"] }
 
 # The bundled SDL3 / SDL_ttf C/C++ must not use the MSVC debug CRT in dev builds, or linking fails on Windows.
 [profile.dev.package.sdl3-sys]
