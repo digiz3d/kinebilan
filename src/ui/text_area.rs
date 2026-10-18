@@ -29,13 +29,14 @@ impl<'a> Gui<'a> {
         let text_x = x + PAD_X;
         let text_y = y + PAD_Y;
         if focused {
-            self.caret.claim(field, value);
+            self.caret.claim(field, value, self.focus_by_tab);
             self.caret.fit(value);
-            if let Some((px, py)) = click {
+            let pointer = click.or(self.caret.dragging.then_some(self.input.mouse));
+            if let Some((px, py)) = pointer {
                 let lines = wrap_spans(font, value, wrap_w);
                 let row = ((py - text_y) / lh).clamp(0, lines.len() as i32 - 1) as usize;
                 let i = index_at(font, value, lines[row], px - text_x);
-                self.caret.select_to(i, self.input.shift);
+                self.place_caret(value, i, click.is_some());
             }
             self.apply_input(font, value, Some(wrap_w), Charset::Text);
         }

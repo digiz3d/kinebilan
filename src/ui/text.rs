@@ -47,6 +47,22 @@ pub(super) fn line_of(lines: &[(usize, usize)], cursor: usize) -> usize {
     lines.iter().position(|&(_, end)| cursor <= end).unwrap_or(lines.len() - 1)
 }
 
+pub(super) fn word_span(value: &str, i: usize) -> (usize, usize) {
+    let is_word = |c: char| c.is_alphanumeric() || c == '_';
+    let start = value[..i]
+        .char_indices()
+        .rev()
+        .take_while(|&(_, c)| is_word(c))
+        .last()
+        .map_or(i, |(j, _)| j);
+    let end = value[i..]
+        .char_indices()
+        .take_while(|&(_, c)| is_word(c))
+        .last()
+        .map_or(i, |(j, c)| i + j + c.len_utf8());
+    (start, end)
+}
+
 pub(super) fn index_at(font: &Font, value: &str, (start, end): (usize, usize), x: i32) -> usize {
     let text = &value[start..end];
     text.char_indices()
@@ -63,4 +79,25 @@ pub fn area_height(font: &Font, value: &str, w: i32, min_rows: usize) -> i32 {
         wrap_spans(font, value, w - 2 * PAD_X).len()
     };
     rows.max(min_rows) as i32 * line_height(font) + 2 * PAD_Y
+}
+
+#[cfg(test)]
+mod tests {
+    use super::word_span;
+
+    #[test]
+    fn test_word_span_selects_surrounding_word() {
+        assert_eq!(word_span("Jean Dupont", 6), (5, 11));
+        assert_eq!(word_span("Jean Dupont", 1), (0, 4));
+    }
+
+    #[test]
+    fn test_word_span_at_boundary_selects_left_word() {
+        assert_eq!(word_span("Jean Dupont", 4), (0, 4));
+    }
+
+    #[test]
+    fn test_word_span_handles_accents() {
+        assert_eq!(word_span("Prénom test", 4), (0, 7));
+    }
 }

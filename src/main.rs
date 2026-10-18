@@ -41,6 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut app = App::new();
     let started = Instant::now();
     let mut mouse = (0, 0);
+    let mut mouse_down = false;
     let mut focus = None;
     let mut caret = Caret::default();
     let mut redraw_now = false;
@@ -54,10 +55,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             match event {
                 Event::Quit { .. } => break 'running,
                 Event::MouseMotion { x, y, .. } => mouse = (x as i32, y as i32),
-                Event::MouseButtonDown { mouse_btn: MouseButton::Left, x, y, .. } => {
+                Event::MouseButtonDown { mouse_btn: MouseButton::Left, x, y, clicks, .. } => {
                     mouse = (x as i32, y as i32);
+                    mouse_down = true;
                     input.click = Some(mouse);
+                    input.clicks = clicks;
                 }
+                Event::MouseButtonUp { mouse_btn: MouseButton::Left, .. } => mouse_down = false,
                 Event::MouseWheel { y, .. } => input.scroll_px -= y * WHEEL_STEP_PX,
                 Event::TextInput { text, .. } => input.text.push_str(&text),
                 Event::KeyDown { keycode: Some(key), keymod, .. } => {
@@ -69,6 +73,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         input.mouse = mouse;
+        input.mouse_down = mouse_down;
         input.caret_on = (started.elapsed().as_millis() / 500).is_multiple_of(2);
 
         let (width, height) = canvas.output_size()?;

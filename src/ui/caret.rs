@@ -6,6 +6,7 @@ pub struct Caret {
     anchor: usize,
     pub(super) cursor: usize,
     pub(super) scroll: i32,
+    pub(super) dragging: bool,
 }
 
 impl Caret {
@@ -13,9 +14,19 @@ impl Caret {
         (self.anchor.min(self.cursor), self.anchor.max(self.cursor))
     }
 
-    pub(super) fn claim(&mut self, field: Field, value: &str) {
+    pub(super) fn claim(&mut self, field: Field, value: &str, select_all: bool) {
         if self.owner != Some(field) {
-            *self = Caret { owner: Some(field), anchor: value.len(), cursor: value.len(), scroll: 0 };
+            *self = Caret {
+                owner: Some(field),
+                anchor: value.len(),
+                cursor: value.len(),
+                scroll: 0,
+                dragging: false,
+            };
+        }
+        if select_all {
+            self.anchor = 0;
+            self.cursor = value.len();
         }
     }
 
@@ -72,4 +83,23 @@ fn floor_boundary(value: &str, mut i: usize) -> usize {
         i -= 1;
     }
     i
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_claim_selects_all_when_requested() {
+        let mut caret = Caret::default();
+        caret.claim(Field::LastName, "Dupont", true);
+        assert_eq!(caret.sel(), (0, 6));
+    }
+
+    #[test]
+    fn test_claim_places_cursor_at_end_by_default() {
+        let mut caret = Caret::default();
+        caret.claim(Field::LastName, "Dupont", false);
+        assert_eq!(caret.sel(), (6, 6));
+    }
 }

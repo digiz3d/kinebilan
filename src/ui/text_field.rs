@@ -24,11 +24,12 @@ impl<'a> Gui<'a> {
         let mut changed = false;
         let mut scroll = 0;
         if focused {
-            self.caret.claim(field, value);
+            self.caret.claim(field, value, self.focus_by_tab);
             self.caret.fit(value);
-            if let Some((px, _)) = click {
+            let pointer = click.or(self.caret.dragging.then_some(self.input.mouse));
+            if let Some((px, _)) = pointer {
                 let i = index_at(font, value, (0, value.len()), px - inner.x + self.caret.scroll);
-                self.caret.select_to(i, self.input.shift);
+                self.place_caret(value, i, click.is_some());
             }
             changed = self.apply_input(font, value, None, charset);
             scroll = self.follow_caret(font, value, inner.w);

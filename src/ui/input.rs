@@ -4,6 +4,8 @@ use sdl3::keyboard::Keycode;
 pub struct Input {
     pub mouse: (i32, i32),
     pub click: Option<(i32, i32)>,
+    pub clicks: u8,
+    pub mouse_down: bool,
     pub scroll_px: f32,
     pub text: String,
     pub keys: Vec<Keycode>,

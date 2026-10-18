@@ -29,6 +29,7 @@ pub struct Gui<'a> {
     pub focus: Option<Field>,
     pub caret: Caret,
     pub changed: bool,
+    pub(super) focus_by_tab: bool,
     interactive: bool,
     clips: Vec<Rect>,
 }
@@ -44,14 +45,20 @@ impl<'a> Gui<'a> {
         clipboard: &'a ClipboardUtil,
         mut input: Input,
         focus: Option<Field>,
-        caret: Caret,
+        mut caret: Caret,
     ) -> Self {
         let mut changed = false;
         let mut focus = focus;
+        let mut focus_by_tab = false;
         if input.keys.contains(&Keycode::Tab) {
             input.keys.retain(|&k| k != Keycode::Tab);
-            focus = focus.map(|f| f.tab_step(!input.shift));
+            let next = focus.map(|f| f.tab_step(!input.shift));
+            focus_by_tab = next != focus;
+            focus = next;
             changed = true;
+        }
+        if !input.mouse_down {
+            caret.dragging = false;
         }
         Self {
             canvas,
@@ -61,6 +68,7 @@ impl<'a> Gui<'a> {
             focus,
             caret,
             changed,
+            focus_by_tab,
             interactive: true,
             clips: Vec::new(),
         }

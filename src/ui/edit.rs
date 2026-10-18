@@ -6,7 +6,7 @@ use crate::focus::Field;
 use super::charset::Charset;
 use super::geometry::Rect;
 use super::gui::Gui;
-use super::text::{index_at, line_of, measure, wrap_spans};
+use super::text::{index_at, line_of, measure, word_span, wrap_spans};
 use super::theme::{ACCENT_BORDER_SOFT, TEXT};
 
 impl<'a> Gui<'a> {
@@ -19,6 +19,26 @@ impl<'a> Gui<'a> {
         Some(point)
     }
 
+    pub(super) fn place_caret(&mut self, value: &str, i: usize, pressed: bool) {
+        if !pressed {
+            self.caret.select_to(i, true);
+            return;
+        }
+        self.caret.dragging = true;
+        match self.input.clicks {
+            2 => {
+                let (lo, hi) = word_span(value, i);
+                self.caret.select_to(lo, false);
+                self.caret.select_to(hi, true);
+            }
+            3.. => {
+                self.caret.select_to(0, false);
+                self.caret.select_to(value.len(), true);
+            }
+            _ => self.caret.select_to(i, self.input.shift),
+        }
+    }
+
     fn copy(&self, value: &str) {
         let (lo, hi) = self.caret.sel();
         if lo < hi {
@@ -27,13 +47,16 @@ impl<'a> Gui<'a> {
     }
 
     fn type_text(&mut self, value: &mut String, text: &str, multiline: bool, charset: Charset) -> bool {
-        let mut changed = self.caret.delete_sel(value);
-        let room = charset.max_len().saturating_sub(value.chars().count());
-        let clean: String = text
+        let accepted: String = text
             .chars()
             .filter(|&c| if c == '\n' { multiline } else { charset.accepts(c) })
-            .take(room)
             .collect();
+        if accepted.is_empty() {
+            return false;
+        }
+        let mut changed = self.caret.delete_sel(value);
+        let room = charset.max_len().saturating_sub(value.chars().count());
+        let clean: String = accepted.chars().take(room).collect();
         if !clean.is_empty() {
             self.caret.insert(value, &clean);
             changed = true;
