@@ -36,7 +36,7 @@ impl<'a> Gui<'a> {
                 let lines = wrap_spans(font, value, wrap_w);
                 let row = ((py - text_y) / lh).clamp(0, lines.len() as i32 - 1) as usize;
                 let i = index_at(font, value, lines[row], px - text_x);
-                self.place_caret(value, i, click.is_some());
+                self.place_caret(value, i, lines[row], click.is_some());
             }
             self.apply_input(font, value, Some(wrap_w), Charset::Text);
         }

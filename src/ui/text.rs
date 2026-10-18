@@ -47,19 +47,37 @@ pub(super) fn line_of(lines: &[(usize, usize)], cursor: usize) -> usize {
     lines.iter().position(|&(_, end)| cursor <= end).unwrap_or(lines.len() - 1)
 }
 
-pub(super) fn word_span(value: &str, i: usize) -> (usize, usize) {
+pub(super) fn word_span(value: &str, i: usize, (row_lo, row_hi): (usize, usize)) -> (usize, usize) {
     let is_word = |c: char| c.is_alphanumeric() || c == '_';
-    let start = value[..i]
+    let seed = if value[i..row_hi].starts_with(is_word) {
+        i
+    } else if value[row_lo..i].ends_with(is_word) {
+        i - value[..i].chars().next_back().map_or(0, char::len_utf8)
+    } else {
+        value[i..row_hi]
+            .char_indices()
+            .find(|&(_, c)| is_word(c))
+            .map(|(j, _)| i + j)
+            .or_else(|| {
+                value[row_lo..i]
+                    .char_indices()
+                    .rev()
+                    .find(|&(_, c)| is_word(c))
+                    .map(|(j, _)| row_lo + j)
+            })
+            .unwrap_or(i)
+    };
+    let start = value[row_lo..seed]
         .char_indices()
         .rev()
         .take_while(|&(_, c)| is_word(c))
         .last()
-        .map_or(i, |(j, _)| j);
-    let end = value[i..]
+        .map_or(seed, |(j, _)| row_lo + j);
+    let end = value[seed..row_hi]
         .char_indices()
         .take_while(|&(_, c)| is_word(c))
         .last()
-        .map_or(i, |(j, c)| i + j + c.len_utf8());
+        .map_or(seed, |(j, c)| seed + j + c.len_utf8());
     (start, end)
 }
 
@@ -87,17 +105,27 @@ mod tests {
 
     #[test]
     fn test_word_span_selects_surrounding_word() {
-        assert_eq!(word_span("Jean Dupont", 6), (5, 11));
-        assert_eq!(word_span("Jean Dupont", 1), (0, 4));
+        assert_eq!(word_span("Jean Dupont", 6, (0, 11)), (5, 11));
+        assert_eq!(word_span("Jean Dupont", 1, (0, 11)), (0, 4));
     }
 
     #[test]
     fn test_word_span_at_boundary_selects_left_word() {
-        assert_eq!(word_span("Jean Dupont", 4), (0, 4));
+        assert_eq!(word_span("Jean Dupont", 4, (0, 11)), (0, 4));
+    }
+
+    #[test]
+    fn test_word_span_on_whitespace_selects_nearest_word() {
+        assert_eq!(word_span("Jean  Dupont", 5, (0, 12)), (6, 12));
+    }
+
+    #[test]
+    fn test_word_span_stays_within_row() {
+        assert_eq!(word_span("abc def", 3, (0, 3)), (0, 3));
     }
 
     #[test]
     fn test_word_span_handles_accents() {
-        assert_eq!(word_span("Prénom test", 4), (0, 7));
+        assert_eq!(word_span("Prénom test", 4, (0, 11)), (0, 7));
     }
 }

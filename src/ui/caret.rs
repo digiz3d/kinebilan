@@ -1,5 +1,9 @@
 use crate::focus::Field;
 
+const HISTORY_LIMIT: usize = 200;
+
+type Snapshot = (String, usize, usize);
+
 #[derive(Default)]
 pub struct Caret {
     owner: Option<Field>,
@@ -7,6 +11,11 @@ pub struct Caret {
     pub(super) cursor: usize,
     pub(super) scroll: i32,
     pub(super) dragging: bool,
+    pub(super) clicks: u8,
+    pub(super) blink_reset: bool,
+    undo: Vec<Snapshot>,
+    redo: Vec<Snapshot>,
+    typing: bool,
 }
 
 impl Caret {
@@ -22,7 +31,9 @@ impl Caret {
                 cursor: value.len(),
                 scroll: 0,
                 dragging: false,
+                ..Caret::default()
             };
+            self.blink_reset = true;
         }
         if select_all {
             self.anchor = 0;
@@ -75,6 +86,56 @@ impl Caret {
         value.insert_str(self.cursor, text);
         self.select_to(self.cursor + text.len(), false);
     }
+
+    pub(super) fn snapshot(&self, value: &str) -> Snapshot {
+        (value.to_owned(), self.anchor, self.cursor)
+    }
+
+    pub(super) fn record(&mut self, before: Snapshot, typing: bool) {
+        if !(typing && self.typing) {
+            self.undo.push(before);
+            if self.undo.len() > HISTORY_LIMIT {
+                self.undo.remove(0);
+            }
+        }
+        self.redo.clear();
+        self.typing = typing;
+    }
+
+    pub fn take_blink_reset(&mut self) -> bool {
+        std::mem::take(&mut self.blink_reset)
+    }
+
+    pub(super) fn end_typing(&mut self) {
+        self.typing = false;
+    }
+
+    pub(super) fn undo(&mut self, value: &mut String) -> bool {
+        let Some(prev) = self.undo.pop() else {
+            return false;
+        };
+        let current = self.snapshot(value);
+        self.redo.push(current);
+        self.restore(value, prev);
+        true
+    }
+
+    pub(super) fn redo(&mut self, value: &mut String) -> bool {
+        let Some(next) = self.redo.pop() else {
+            return false;
+        };
+        let current = self.snapshot(value);
+        self.undo.push(current);
+        self.restore(value, next);
+        true
+    }
+
+    fn restore(&mut self, value: &mut String, (text, anchor, cursor): Snapshot) {
+        *value = text;
+        self.anchor = anchor;
+        self.cursor = cursor;
+        self.typing = false;
+    }
 }
 
 fn floor_boundary(value: &str, mut i: usize) -> usize {
@@ -101,5 +162,24 @@ mod tests {
         let mut caret = Caret::default();
         caret.claim(Field::LastName, "Dupont", false);
         assert_eq!(caret.sel(), (6, 6));
+    }
+
+    #[test]
+    fn test_undo_redo_restores_text_and_selection() {
+        let mut caret = Caret::default();
+        let mut value = String::from("Dupont");
+        caret.claim(Field::LastName, &value, false);
+        let before = caret.snapshot(&value);
+        caret.delete(&mut value, true);
+        caret.record(before, false);
+        assert_eq!(value, "Dupon");
+
+        assert!(caret.undo(&mut value));
+        assert_eq!(value, "Dupont");
+        assert_eq!(caret.sel(), (6, 6));
+
+        assert!(caret.redo(&mut value));
+        assert_eq!(value, "Dupon");
+        assert!(!caret.redo(&mut value));
     }
 }

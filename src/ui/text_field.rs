@@ -29,7 +29,7 @@ impl<'a> Gui<'a> {
             let pointer = click.or(self.caret.dragging.then_some(self.input.mouse));
             if let Some((px, _)) = pointer {
                 let i = index_at(font, value, (0, value.len()), px - inner.x + self.caret.scroll);
-                self.place_caret(value, i, click.is_some());
+                self.place_caret(value, i, (0, value.len()), click.is_some());
             }
             changed = self.apply_input(font, value, None, charset);
             scroll = self.follow_caret(font, value, inner.w);

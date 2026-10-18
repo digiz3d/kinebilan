@@ -19,21 +19,25 @@ impl<'a> Gui<'a> {
         Some(point)
     }
 
-    pub(super) fn place_caret(&mut self, value: &str, i: usize, pressed: bool) {
+    pub(super) fn place_caret(&mut self, value: &str, i: usize, row: (usize, usize), pressed: bool) {
         if !pressed {
-            self.caret.select_to(i, true);
+            if self.caret.clicks < 2 {
+                self.caret.select_to(i, true);
+            }
             return;
         }
+        self.caret.end_typing();
         self.caret.dragging = true;
+        self.caret.clicks = self.input.clicks;
         match self.input.clicks {
             2 => {
-                let (lo, hi) = word_span(value, i);
+                let (lo, hi) = word_span(value, i, row);
                 self.caret.select_to(lo, false);
                 self.caret.select_to(hi, true);
             }
             3.. => {
-                self.caret.select_to(0, false);
-                self.caret.select_to(value.len(), true);
+                self.caret.select_to(row.0, false);
+                self.caret.select_to(row.1, true);
             }
             _ => self.caret.select_to(i, self.input.shift),
         }
@@ -83,9 +87,20 @@ impl<'a> Gui<'a> {
         let multiline = wrap_w.is_some();
         let (shift, ctrl) = (self.input.shift, self.input.ctrl);
         let text = std::mem::take(&mut self.input.text);
-        let mut changed = self.type_text(value, &text, multiline, charset);
-        for key in std::mem::take(&mut self.input.keys) {
-            changed |= match key {
+        let keys = std::mem::take(&mut self.input.keys);
+        let redo = ctrl && (keys.contains(&Keycode::Y) || (shift && keys.contains(&Keycode::Z)));
+        let undo = ctrl && !shift && keys.contains(&Keycode::Z);
+        if undo || redo {
+            let moved = if redo { self.caret.redo(value) } else { self.caret.undo(value) };
+            self.changed |= moved;
+            return moved;
+        }
+        let before = (!text.is_empty() || !keys.is_empty()).then(|| self.caret.snapshot(value));
+        let text_only = keys.is_empty();
+        let typed = self.type_text(value, &text, multiline, charset);
+        let mut edited = false;
+        for key in keys {
+            edited |= match key {
                 Keycode::Backspace => self.caret.delete(value, true),
                 Keycode::Delete => self.caret.delete(value, false),
                 Keycode::Return | Keycode::KpEnter => self.type_text(value, "\n", multiline, charset),
@@ -124,7 +139,11 @@ impl<'a> Gui<'a> {
                 _ => false,
             };
         }
+        let changed = typed || edited;
         if changed {
+            if let Some(before) = before {
+                self.caret.record(before, typed && text_only);
+            }
             self.changed = true;
         }
         changed
@@ -156,7 +175,7 @@ impl<'a> Gui<'a> {
         }
         self.text(font, &value[start..end], x, y, TEXT);
         let cursor = self.caret.cursor;
-        if live && self.input.caret_on && (start..=end).contains(&cursor) {
+        if live && (self.input.caret_on || self.caret.blink_reset) && (start..=end).contains(&cursor) {
             self.fill(Rect::new(x + measure(font, &value[start..cursor]).0, y, 1, lh), TEXT);
         }
     }

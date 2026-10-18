@@ -1,4 +1,10 @@
-use sdl3::ttf::{Font, Sdl3TtfContext};
+use sdl3::ttf::{Font, Sdl3TtfContext, sys};
+
+const EMOJI_FONTS: &[&str] = &[
+    r"C:\Windows\Fonts\seguiemj.ttf",
+    "/System/Library/Fonts/Apple Color Emoji.ttc",
+    "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+];
 
 const REGULAR_FONTS: &[&str] = &[
     r"C:\Windows\Fonts\segoeui.ttf",
@@ -28,24 +34,40 @@ pub struct Fonts {
     pub badge: Font<'static>,
     pub button: Font<'static>,
     pub button_large: Font<'static>,
+    _emoji: Vec<Font<'static>>,
 }
 
 impl Fonts {
     pub fn load(ttf: &Sdl3TtfContext) -> Result<Self, String> {
+        let mut emoji = Vec::new();
         Ok(Self {
-            title: load_font(ttf, BOLD_FONTS, 26.0)?,
-            heading: load_font(ttf, BOLD_FONTS, 20.0)?,
-            section: load_font(ttf, BOLD_FONTS, 16.0)?,
-            modal_title: load_font(ttf, BOLD_FONTS, 17.0)?,
-            label: load_font(ttf, BOLD_FONTS, 13.0)?,
-            body: load_font(ttf, REGULAR_FONTS, 14.0)?,
-            body_large: load_font(ttf, REGULAR_FONTS, 15.0)?,
-            small: load_font(ttf, REGULAR_FONTS, 13.0)?,
-            badge: load_font(ttf, REGULAR_FONTS, 12.0)?,
-            button: load_font(ttf, REGULAR_FONTS, 14.0)?,
-            button_large: load_font(ttf, BOLD_FONTS, 15.0)?,
+            title: load_styled(ttf, BOLD_FONTS, 26.0, &mut emoji)?,
+            heading: load_styled(ttf, BOLD_FONTS, 20.0, &mut emoji)?,
+            section: load_styled(ttf, BOLD_FONTS, 16.0, &mut emoji)?,
+            modal_title: load_styled(ttf, BOLD_FONTS, 17.0, &mut emoji)?,
+            label: load_styled(ttf, BOLD_FONTS, 13.0, &mut emoji)?,
+            body: load_styled(ttf, REGULAR_FONTS, 14.0, &mut emoji)?,
+            body_large: load_styled(ttf, REGULAR_FONTS, 15.0, &mut emoji)?,
+            small: load_styled(ttf, REGULAR_FONTS, 13.0, &mut emoji)?,
+            badge: load_styled(ttf, REGULAR_FONTS, 12.0, &mut emoji)?,
+            button: load_styled(ttf, REGULAR_FONTS, 14.0, &mut emoji)?,
+            button_large: load_styled(ttf, BOLD_FONTS, 15.0, &mut emoji)?,
+            _emoji: emoji,
         })
     }
+}
+
+fn load_styled(
+    ttf: &Sdl3TtfContext,
+    paths: &[&str],
+    size: f32,
+    emoji: &mut Vec<Font<'static>>,
+) -> Result<Font<'static>, String> {
+    let font = load_font(ttf, paths, size)?;
+    let emoji_font = load_font(ttf, EMOJI_FONTS, size)?;
+    unsafe { sys::TTF_AddFallbackFont(font.raw(), emoji_font.raw()) };
+    emoji.push(emoji_font);
+    Ok(font)
 }
 
 fn load_font(ttf: &Sdl3TtfContext, paths: &[&str], size: f32) -> Result<Font<'static>, String> {

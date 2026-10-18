@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut event_pump = sdl.event_pump()?;
 
     let mut app = App::new();
-    let started = Instant::now();
+    let mut started = Instant::now();
     let mut mouse = (0, 0);
     let mut mouse_down = false;
     let mut focus = None;
@@ -78,13 +78,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let (width, height) = canvas.output_size()?;
         let screen = Rect::new(0, 0, width as i32, height as i32);
-        let (next_focus, changed, next_caret) = {
+        let (next_focus, changed, mut next_caret) = {
             let mut gui = Gui::new(&mut canvas, &textures, &clipboard, input, focus, caret);
             app.draw(&mut gui, &fonts, screen);
             gui.finish();
             (gui.focus, gui.changed, gui.caret)
         };
         canvas.present();
+        if next_caret.take_blink_reset() {
+            started = Instant::now();
+        }
         focus = next_focus;
         caret = next_caret;
         redraw_now = changed;
