@@ -20,6 +20,7 @@ impl<'a> Gui<'a> {
     ) -> bool {
         let click = self.edit_click(field, rect);
         let focused = self.focus == Some(field);
+        let secret = charset == Charset::Secret;
         let inner = Rect::new(rect.x + PAD_X, rect.y, rect.w - 2 * PAD_X, rect.h);
         let mut changed = false;
         let mut scroll = 0;
@@ -28,11 +29,11 @@ impl<'a> Gui<'a> {
             self.caret.fit(value);
             let pointer = click.or(self.caret.dragging.then_some(self.input.mouse));
             if let Some((px, _)) = pointer {
-                let i = index_at(font, value, (0, value.len()), px - inner.x + self.caret.scroll);
+                let i = index_at(font, value, (0, value.len()), px - inner.x + self.caret.scroll, secret);
                 self.place_caret(value, i, (0, value.len()), click.is_some());
             }
             changed = self.apply_input(font, value, None, charset);
-            scroll = self.follow_caret(font, value, inner.w);
+            scroll = self.follow_caret(font, value, inner.w, secret);
         }
 
         let lh = line_height(font);
@@ -43,7 +44,7 @@ impl<'a> Gui<'a> {
         if value.is_empty() {
             self.text(font, placeholder, inner.x, text_y, PLACEHOLDER);
         }
-        self.edit_line(font, value, (0, value.len()), inner.x - scroll, text_y, lh, focused);
+        self.edit_line(font, value, (0, value.len()), inner.x - scroll, text_y, lh, focused, secret);
         self.pop_clip();
 
         changed
