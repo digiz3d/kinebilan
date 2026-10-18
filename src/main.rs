@@ -91,6 +91,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         focus = next_focus;
         caret = next_caret;
         redraw_now = changed;
+        if app.quit_requested() {
+            break 'running;
+        }
     }
 
     Ok(())
