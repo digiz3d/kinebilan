@@ -1,0 +1,25 @@
+name: Unused dependencies
+
+on:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  udeps:
+    name: cargo-udeps
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@nightly
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-udeps
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Check for unused dependencies
+        run: cargo udeps --all-targets

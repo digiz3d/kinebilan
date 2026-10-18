@@ -1,2 +1,6 @@
 [tools]
 rust = "latest"
+
+[tasks.udeps]
+description = "Find unused dependencies (requires nightly toolchain and cargo-udeps)"
+run = "cargo +nightly udeps --all-targets"
