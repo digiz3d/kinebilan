@@ -16,7 +16,7 @@ jobs:
     name: Windows x64
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -34,7 +34,7 @@ jobs:
           Copy-Item target/x86_64-pc-windows-msvc/release/kinebilan.exe dist/
           Compress-Archive -Path dist/kinebilan.exe -DestinationPath ${{ env.APP_NAME }}-windows-x64.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ env.APP_NAME }}-windows-x64
           path: ${{ env.APP_NAME }}-windows-x64.zip
@@ -44,7 +44,7 @@ jobs:
     name: macOS universal
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -100,7 +100,7 @@ jobs:
           hdiutil create -volname "${APP_DISPLAY_NAME}" -srcfolder "$STAGING" \
             -ov -format UDZO "${APP_NAME}-macos-universal.dmg"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ env.APP_NAME }}-macos-universal
           path: ${{ env.APP_NAME }}-macos-universal.dmg
