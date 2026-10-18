@@ -30,8 +30,10 @@ enum FormAction {
     Delete,
     Save,
     OpenSessionModal,
+    EditSession(usize),
+    DeleteSession(usize),
     CloseSessionModal,
-    AddSession,
+    SaveSession,
 }
 
 pub struct App {
@@ -41,7 +43,10 @@ pub struct App {
     active_patient: Patient,
     validation_error: Option<String>,
     show_session_modal: bool,
+    new_session_date: String,
     new_session_notes: String,
+    editing_session: Option<usize>,
+    confirm_delete_session: Option<usize>,
     confirm_delete: bool,
     patients_scroll: i32,
     form_scroll: i32,
@@ -57,7 +62,10 @@ impl App {
             active_patient: Patient::default(),
             validation_error: None,
             show_session_modal: false,
+            new_session_date: String::new(),
             new_session_notes: String::new(),
+            editing_session: None,
+            confirm_delete_session: None,
             confirm_delete: false,
             patients_scroll: 0,
             form_scroll: 0,

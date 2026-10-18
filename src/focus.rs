@@ -7,6 +7,7 @@ pub enum Field {
     PriorIssues,
     Symptoms,
     Goals,
+    SessionDate,
     SessionNotes,
 }
 

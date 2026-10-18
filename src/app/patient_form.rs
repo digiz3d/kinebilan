@@ -84,16 +84,30 @@ impl App {
                 }
             }
             FormAction::OpenSessionModal => {
+                self.new_session_date = chrono::Local::now().format("%Y-%m-%d").to_string();
                 self.new_session_notes.clear();
+                self.editing_session = None;
                 self.show_session_modal = true;
                 gui.focus = Some(Field::SessionNotes);
             }
+            FormAction::EditSession(idx) => {
+                let session = &self.active_patient.sessions[idx];
+                self.new_session_date = session.date.clone();
+                self.new_session_notes = session.notes.clone();
+                self.editing_session = Some(idx);
+                self.show_session_modal = true;
+                gui.focus = Some(Field::SessionNotes);
+            }
+            FormAction::DeleteSession(idx) => {
+                self.delete_session(idx);
+            }
             FormAction::CloseSessionModal => {
                 self.show_session_modal = false;
+                self.editing_session = None;
                 gui.focus = None;
             }
-            FormAction::AddSession => {
-                self.add_session();
+            FormAction::SaveSession => {
+                self.save_session();
                 if !self.show_session_modal {
                     gui.focus = None;
                 }

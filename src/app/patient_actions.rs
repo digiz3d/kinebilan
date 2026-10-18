@@ -20,6 +20,8 @@ impl App {
         self.validation_error = None;
         self.show_session_modal = false;
         self.new_session_notes.clear();
+        self.editing_session = None;
+        self.confirm_delete_session = None;
         self.confirm_delete = false;
         self.form_scroll = 0;
         self.sessions_scroll = 0;
@@ -34,7 +36,8 @@ impl App {
     }
 
     pub(super) fn save_active(&mut self) -> bool {
-        let curr = self.active_patient.clone();
+        let mut curr = self.active_patient.clone();
+        curr.sort_sessions();
         if curr.last_name.trim().is_empty()
             || curr.first_name.trim().is_empty()
             || curr.birth_date.trim().is_empty()

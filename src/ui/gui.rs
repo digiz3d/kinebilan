@@ -92,7 +92,11 @@ impl<'a> Gui<'a> {
 
     pub fn fill_bordered(&mut self, rect: Rect, fill: Color, border: Color) {
         self.fill(rect, fill);
-        self.canvas.set_draw_color(border);
+        self.outline(rect, border);
+    }
+
+    pub fn outline(&mut self, rect: Rect, color: Color) {
+        self.canvas.set_draw_color(color);
         let _ = self.canvas.draw_rect(frect(rect));
     }
 

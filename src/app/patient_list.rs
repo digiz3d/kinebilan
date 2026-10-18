@@ -7,7 +7,7 @@ impl App {
         gui.text(&fonts.title, "KinéBilan", area.x, area.y, TITLE);
         gui.text(&fonts.body, "Dossiers des patients", area.x, area.y + 36, MUTED);
         let new_button = Rect::new(area.right() - 190, area.y + 8, 190, 40);
-        if gui.button(new_button, "+ Nouveau patient", &fonts.button, ButtonStyle::Primary) {
+        if gui.button(new_button, "Nouveau patient", &fonts.button, ButtonStyle::Primary) {
             self.start_new_patient();
             gui.focus = None;
             return;
@@ -20,7 +20,7 @@ impl App {
         self.draw_search(gui, fonts, Rect::new(area.x, y, area.w, 44));
         y += 44 + 20;
 
-        let list = Rect::new(area.x, y, area.w, (area.bottom() - y).min(540));
+        let list = Rect::new(area.x, y, area.w, area.bottom() - y);
         let visible = self.visible_patients();
 
         if visible.is_empty() {
@@ -68,6 +68,7 @@ impl App {
         }
         gui.scrollbar(Rect::new(list.right() - 6, list.y, 4, list.h), self.patients_scroll, content_h);
         gui.pop_clip();
+        gui.outline(list, INPUT_BORDER);
 
         if let Some(index) = open {
             let patient = self.patients[index].clone();

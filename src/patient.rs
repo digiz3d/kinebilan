@@ -19,6 +19,13 @@ pub struct Patient {
     pub sessions: Vec<Session>,
 }
 
+impl Patient {
+    /// Sorts sessions by date, most recent first. Dates are `YYYY-MM-DD`, so string order is date order.
+    pub fn sort_sessions(&mut self) {
+        self.sessions.sort_by(|a, b| b.date.cmp(&a.date));
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

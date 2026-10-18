@@ -1,3 +1,4 @@
+use super::sessions::is_valid_session_date;
 use super::{App, FormAction};
 use crate::focus::Field;
 use crate::ui::*;
@@ -11,8 +12,10 @@ impl App {
         let inner_w = dialog_w - 2 * pad;
         let title_h = line_height(&fonts.modal_title);
         let notes_h = area_height(&fonts.body, &self.new_session_notes, inner_w, 4);
+        let label_h = line_height(&fonts.label);
+        let date_h = label_h + 6 + 40;
         let button_h = 40;
-        let dialog_h = pad + title_h + 16 + notes_h + 16 + button_h + pad;
+        let dialog_h = pad + title_h + 16 + date_h + 16 + notes_h + 16 + button_h + pad;
         let dialog = Rect::new(
             screen.x + (screen.w - dialog_w) / 2,
             screen.y + (screen.h - dialog_h) / 2,
@@ -23,8 +26,28 @@ impl App {
 
         let x = dialog.x + pad;
         let mut y = dialog.y + pad;
-        gui.text(&fonts.modal_title, "What did you do? (Compte-rendu de la séance)", x, y, TITLE);
+        let (modal_title, save_label) = if self.editing_session.is_some() {
+            ("Modifier le compte-rendu de la séance", "Enregistrer")
+        } else {
+            ("What did you do? (Compte-rendu de la séance)", "Enregistrer séance")
+        };
+        gui.text(&fonts.modal_title, modal_title, x, y, TITLE);
         y += title_h + 16;
+        gui.text(&fonts.label, "Date de la séance", x, y, LABEL);
+        let date_y = y + label_h + 6;
+        let date_valid = is_valid_session_date(&self.new_session_date);
+        gui.text_field(
+            Field::SessionDate,
+            Rect::new(x, date_y, 200, 40),
+            &mut self.new_session_date,
+            "AAAA-MM-JJ",
+            &fonts.body,
+            Charset::Date,
+        );
+        if !date_valid {
+            gui.text(&fonts.label, "Date invalide", x + 212, date_y + 12, ALERT_TEXT);
+        }
+        y += date_h + 16;
         gui.text_area(
             Field::SessionNotes,
             x,
@@ -43,8 +66,8 @@ impl App {
         if gui.button(cancel_rect, "Annuler", &fonts.button, ButtonStyle::Secondary) {
             action = FormAction::CloseSessionModal;
         }
-        if gui.button(save_rect, "Enregistrer séance", &fonts.button, ButtonStyle::Primary) {
-            action = FormAction::AddSession;
+        if gui.button(save_rect, save_label, &fonts.button, ButtonStyle::Primary) {
+            action = FormAction::SaveSession;
         }
         action
     }
