@@ -1,3 +1,4 @@
+use super::form_bar::BAR_H;
 use super::form_footer::FOOTER_H;
 use super::{App, FormAction, Page, CARD_PADDING};
 use crate::focus::Field;
@@ -5,31 +6,22 @@ use crate::ui::*;
 
 impl App {
     pub(super) fn draw_form(&mut self, gui: &mut Gui, fonts: &Fonts, card: Rect, screen: Rect) {
-        let viewport = card.inset(CARD_PADDING);
-        let (x, w) = (viewport.x, viewport.w);
-        let modal_open = self.show_session_modal;
+        let modal_open = self.show_session_modal || self.show_leave_modal;
         gui.set_interactive(!modal_open);
         let mut action = FormAction::None;
 
-        gui.push_clip(card);
-        let mut y = viewport.y - self.form_scroll;
-
-        let header_h = 40;
-        if gui.button(Rect::new(x, y, 110, header_h), "← Retour", &fonts.button, ButtonStyle::Secondary) {
-            action = FormAction::Back;
+        let bar = Rect::new(card.x, card.y, card.w, BAR_H);
+        let bar_action = self.draw_form_bar(gui, fonts, bar);
+        if bar_action != FormAction::None {
+            action = bar_action;
         }
-        let title = if self.active_patient.last_name.is_empty() {
-            "Nouveau patient".to_string()
-        } else {
-            format!(
-                "Fiche patient : {} {}",
-                self.active_patient.last_name, self.active_patient.first_name
-            )
-        };
-        gui.text_centered(&fonts.heading, &title, Rect::new(x + 120, y, w - 240, header_h), TITLE);
-        y += header_h + 16;
-        gui.fill(Rect::new(x, y, w, 1), DIVIDER);
-        y += 1 + 20;
+
+        let body = Rect::new(card.x, bar.bottom(), card.w, card.h - BAR_H);
+        let viewport = body.inset(CARD_PADDING);
+        let (x, w) = (viewport.x, viewport.w);
+
+        gui.push_clip(body);
+        let mut y = viewport.y - self.form_scroll;
 
         if let Some(error) = self.validation_error.clone() {
             let alert = Rect::new(x, y, w, 44);
@@ -57,13 +49,18 @@ impl App {
 
         let content_bottom = y + self.form_scroll;
         let content_h = content_bottom - viewport.y;
-        let delta = gui.take_scroll(card);
+        let delta = gui.take_scroll(body);
         self.form_scroll = clamp_scroll(self.form_scroll, delta, content_h, viewport.h);
-        gui.scrollbar(Rect::new(card.right() - 6, card.y, 4, card.h), viewport.h, self.form_scroll, content_h);
+        gui.scrollbar(Rect::new(card.right() - 6, body.y, 4, body.h), viewport.h, self.form_scroll, content_h);
         gui.pop_clip();
 
         gui.set_interactive(true);
-        if modal_open {
+        if self.show_leave_modal {
+            let modal_action = self.draw_leave_modal(gui, fonts, screen);
+            if modal_action != FormAction::None {
+                action = modal_action;
+            }
+        } else if self.show_session_modal {
             let modal_action = self.draw_session_modal(gui, fonts, screen);
             if modal_action != FormAction::None {
                 action = modal_action;
@@ -73,6 +70,18 @@ impl App {
         match action {
             FormAction::None => {}
             FormAction::Back => {
+                if self.has_unsaved_changes() {
+                    self.show_leave_modal = true;
+                } else {
+                    self.page = Page::Home;
+                }
+                gui.focus = None;
+            }
+            FormAction::CancelLeave => {
+                self.show_leave_modal = false;
+            }
+            FormAction::LeaveWithoutSaving => {
+                self.show_leave_modal = false;
                 self.page = Page::Home;
                 gui.focus = None;
             }
@@ -81,6 +90,7 @@ impl App {
                 gui.focus = None;
             }
             FormAction::Save => {
+                self.show_leave_modal = false;
                 if self.save_active() {
                     gui.focus = None;
                 }

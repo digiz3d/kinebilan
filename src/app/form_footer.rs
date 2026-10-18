@@ -35,15 +35,6 @@ impl App {
                 self.confirm_delete = true;
             }
         }
-        let save_w = measure(&fonts.button_large, "Enregistrer").0 + 56;
-        if gui.button(
-            Rect::new(x + w - save_w, button_y, save_w, button_h),
-            "Enregistrer",
-            &fonts.button_large,
-            ButtonStyle::Primary,
-        ) {
-            action = FormAction::Save;
-        }
         (action, y + FOOTER_H)
     }
 }

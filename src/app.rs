@@ -1,7 +1,9 @@
 mod access;
 mod clinical;
+mod form_bar;
 mod form_footer;
 mod identity;
+mod leave_modal;
 mod load_error;
 mod patient_actions;
 mod patient_form;
@@ -43,6 +45,8 @@ enum FormAction {
     DeleteSession(usize),
     CloseSessionModal,
     SaveSession,
+    CancelLeave,
+    LeaveWithoutSaving,
 }
 
 pub struct App {
@@ -59,6 +63,7 @@ pub struct App {
     active_patient: Patient,
     validation_error: Option<String>,
     show_session_modal: bool,
+    show_leave_modal: bool,
     new_session_date: String,
     new_session_notes: String,
     new_session_objectives: String,
@@ -92,6 +97,7 @@ impl App {
             active_patient: Patient::default(),
             validation_error: None,
             show_session_modal: false,
+            show_leave_modal: false,
             new_session_date: String::new(),
             new_session_notes: String::new(),
             new_session_objectives: String::new(),
