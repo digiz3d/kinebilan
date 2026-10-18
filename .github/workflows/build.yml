@@ -2,8 +2,6 @@ name: Build
 
 on:
   push:
-  pull_request:
-  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -60,12 +58,13 @@ jobs:
       - name: Create universal binary and app bundle
         run: |
           VERSION=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          BIN_NAME=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]')
           APP_DIR="dist/${APP_NAME}.app"
           mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
 
           lipo -create \
-            "target/aarch64-apple-darwin/release/${APP_NAME,,}" \
-            "target/x86_64-apple-darwin/release/${APP_NAME,,}" \
+            "target/aarch64-apple-darwin/release/${BIN_NAME}" \
+            "target/x86_64-apple-darwin/release/${BIN_NAME}" \
             -output "$APP_DIR/Contents/MacOS/${APP_NAME}"
           chmod +x "$APP_DIR/Contents/MacOS/${APP_NAME}"
           lipo -info "$APP_DIR/Contents/MacOS/${APP_NAME}"
