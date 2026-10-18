@@ -14,7 +14,7 @@ use sdl3::mouse::MouseButton;
 use sdl3::render::BlendMode;
 
 use app::App;
-use ui::{Fonts, Gui, Input, Rect};
+use ui::{Caret, Fonts, Gui, Input, Rect};
 
 const WHEEL_STEP_PX: f32 = 40.0;
 const IDLE_REDRAW: Duration = Duration::from_millis(250);
@@ -30,6 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .resizable()
         .build()?;
     video.text_input().start(&window);
+    let clipboard = video.clipboard();
 
     let mut canvas = window.into_canvas();
     canvas.set_blend_mode(BlendMode::Blend);
@@ -41,6 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let started = Instant::now();
     let mut mouse = (0, 0);
     let mut focus = None;
+    let mut caret = Caret::default();
     let mut redraw_now = false;
 
     'running: loop {
@@ -60,6 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Event::TextInput { text, .. } => input.text.push_str(&text),
                 Event::KeyDown { keycode: Some(key), keymod, .. } => {
                     input.shift = keymod.intersects(Mod::LSHIFTMOD | Mod::RSHIFTMOD);
+                    input.ctrl = keymod.intersects(Mod::LCTRLMOD | Mod::RCTRLMOD);
                     input.keys.push(key);
                 }
                 _ => {}
@@ -70,14 +73,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let (width, height) = canvas.output_size()?;
         let screen = Rect::new(0, 0, width as i32, height as i32);
-        let (next_focus, changed) = {
-            let mut gui = Gui::new(&mut canvas, &textures, input, focus);
+        let (next_focus, changed, next_caret) = {
+            let mut gui = Gui::new(&mut canvas, &textures, &clipboard, input, focus, caret);
             app.draw(&mut gui, &fonts, screen);
             gui.finish();
-            (gui.focus, gui.changed)
+            (gui.focus, gui.changed, gui.caret)
         };
         canvas.present();
         focus = next_focus;
+        caret = next_caret;
         redraw_now = changed;
     }
 

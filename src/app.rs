@@ -1,7 +1,12 @@
 mod clinical;
+mod form_footer;
+mod identity;
+mod patient_actions;
 mod patient_form;
 mod patient_list;
 mod search;
+mod search_bar;
+mod session_modal;
 mod sessions;
 
 use crate::patient::Patient;
