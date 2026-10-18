@@ -1,3 +1,4 @@
+mod access;
 mod clinical;
 mod form_footer;
 mod identity;
@@ -11,7 +12,7 @@ mod session_modal;
 mod sessions;
 
 use crate::patient::Patient;
-use crate::storage::load_patients;
+use crate::storage::{stored_kind, Stored, Vault};
 use crate::ui::*;
 
 const CARD_PADDING: i32 = 28;
@@ -22,6 +23,13 @@ const BOX_GAP: i32 = 14;
 enum Page {
     Home,
     PatientForm,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum Access {
+    Setup,
+    Unlock,
+    Ready,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -40,6 +48,11 @@ enum FormAction {
 pub struct App {
     patients: Vec<Patient>,
     load_error: Option<String>,
+    access: Access,
+    vault: Option<Vault>,
+    password: String,
+    password_confirm: String,
+    access_error: Option<String>,
     quit_requested: bool,
     page: Page,
     search_query: String,
@@ -60,13 +73,19 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
-        let (patients, load_error) = match load_patients() {
-            Ok(patients) => (patients, None),
-            Err(error) => (Vec::new(), Some(error.to_string())),
+        let (access, load_error) = match stored_kind() {
+            Ok(Stored::Encrypted) => (Access::Unlock, None),
+            Ok(Stored::Empty | Stored::Plaintext) => (Access::Setup, None),
+            Err(error) => (Access::Setup, Some(error.to_string())),
         };
         Self {
-            patients,
+            patients: Vec::new(),
             load_error,
+            access,
+            vault: None,
+            password: String::new(),
+            password_confirm: String::new(),
+            access_error: None,
             quit_requested: false,
             page: Page::Home,
             search_query: String::new(),
@@ -97,6 +116,10 @@ impl App {
 
         if self.load_error.is_some() {
             self.draw_load_error(gui, fonts, screen);
+            return;
+        }
+        if self.access != Access::Ready {
+            self.draw_access(gui, fonts, screen);
             return;
         }
 

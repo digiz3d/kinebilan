@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use sdl3::ttf::Font;
 
 use super::theme::{PAD_X, PAD_Y};
@@ -81,13 +83,22 @@ pub(super) fn word_span(value: &str, i: usize, (row_lo, row_hi): (usize, usize))
     (start, end)
 }
 
-pub(super) fn index_at(font: &Font, value: &str, (start, end): (usize, usize), x: i32) -> usize {
+pub(super) fn index_at(font: &Font, value: &str, (start, end): (usize, usize), x: i32, secret: bool) -> usize {
     let text = &value[start..end];
     text.char_indices()
         .map(|(i, _)| i)
         .chain([text.len()])
-        .min_by_key(|&i| (measure(font, &text[..i]).0 - x).abs())
+        .min_by_key(|&i| (measure(font, &shown(&text[..i], secret)).0 - x).abs())
         .map_or(start, |i| start + i)
+}
+
+/// Secret text is drawn as one dot per character, so widths and positions follow the dots.
+pub(super) fn shown(text: &str, secret: bool) -> Cow<'_, str> {
+    if secret {
+        Cow::Owned("•".repeat(text.chars().count()))
+    } else {
+        Cow::Borrowed(text)
+    }
 }
 
 pub fn area_height(font: &Font, value: &str, w: i32, min_rows: usize) -> i32 {

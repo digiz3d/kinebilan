@@ -6,7 +6,7 @@ use crate::focus::Field;
 use super::charset::Charset;
 use super::geometry::Rect;
 use super::gui::Gui;
-use super::text::{index_at, line_of, measure, word_span, wrap_spans};
+use super::text::{index_at, line_of, measure, shown, word_span, wrap_spans};
 use super::theme::{ACCENT_BORDER_SOFT, TEXT};
 
 impl<'a> Gui<'a> {
@@ -79,13 +79,14 @@ impl<'a> Gui<'a> {
         };
         if let Some(&span) = target {
             let x = measure(font, &value[lines[row].0..self.caret.cursor]).0;
-            let i = index_at(font, value, span, x);
+            let i = index_at(font, value, span, x, false);
             self.caret.select_to(i, self.input.shift);
         }
     }
 
     pub(super) fn apply_input(&mut self, font: &Font, value: &mut String, wrap_w: Option<i32>, charset: Charset) -> bool {
         let multiline = wrap_w.is_some();
+        let secret = charset == Charset::Secret;
         let (shift, ctrl) = (self.input.shift, self.input.ctrl);
         let text = std::mem::take(&mut self.input.text);
         let keys = std::mem::take(&mut self.input.keys);
@@ -126,11 +127,15 @@ impl<'a> Gui<'a> {
                     false
                 }
                 Keycode::C if ctrl => {
-                    self.copy(value);
+                    if !secret {
+                        self.copy(value);
+                    }
                     false
                 }
                 Keycode::X if ctrl => {
-                    self.copy(value);
+                    if !secret {
+                        self.copy(value);
+                    }
                     self.caret.delete_sel(value)
                 }
                 Keycode::V if ctrl => match self.clipboard.clipboard_text() {
@@ -150,9 +155,9 @@ impl<'a> Gui<'a> {
         changed
     }
 
-    pub(super) fn follow_caret(&mut self, font: &Font, value: &str, view_w: i32) -> i32 {
-        let text_w = measure(font, value).0;
-        let cursor_x = measure(font, &value[..self.caret.cursor]).0;
+    pub(super) fn follow_caret(&mut self, font: &Font, value: &str, view_w: i32, secret: bool) -> i32 {
+        let text_w = measure(font, &shown(value, secret)).0;
+        let cursor_x = measure(font, &shown(&value[..self.caret.cursor], secret)).0;
         let mut scroll = self.caret.scroll.min((text_w - view_w + 2).max(0));
         if cursor_x - scroll > view_w - 2 {
             scroll = cursor_x - view_w + 2;
@@ -164,20 +169,20 @@ impl<'a> Gui<'a> {
         scroll
     }
 
-    pub(super) fn edit_line(&mut self, font: &Font, value: &str, (start, end): (usize, usize), x: i32, y: i32, lh: i32, live: bool) {
+    pub(super) fn edit_line(&mut self, font: &Font, value: &str, (start, end): (usize, usize), x: i32, y: i32, lh: i32, live: bool, secret: bool) {
         if live {
             let (lo, hi) = self.caret.sel();
             let (lo, hi) = (lo.clamp(start, end), hi.clamp(start, end));
             if lo < hi {
-                let x0 = x + measure(font, &value[start..lo]).0;
-                let x1 = x + measure(font, &value[start..hi]).0;
+                let x0 = x + measure(font, &shown(&value[start..lo], secret)).0;
+                let x1 = x + measure(font, &shown(&value[start..hi], secret)).0;
                 self.fill(Rect::new(x0, y, x1 - x0, lh), ACCENT_BORDER_SOFT);
             }
         }
-        self.text(font, &value[start..end], x, y, TEXT);
+        self.text(font, &shown(&value[start..end], secret), x, y, TEXT);
         let cursor = self.caret.cursor;
         if live && (self.input.caret_on || self.caret.blink_reset) && (start..=end).contains(&cursor) {
-            self.fill(Rect::new(x + measure(font, &value[start..cursor]).0, y, 1, lh), TEXT);
+            self.fill(Rect::new(x + measure(font, &shown(&value[start..cursor], secret)).0, y, 1, lh), TEXT);
         }
     }
 }

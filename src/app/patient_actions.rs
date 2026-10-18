@@ -1,6 +1,5 @@
 use super::{App, Page};
 use crate::patient::Patient;
-use crate::storage::save_patients;
 
 impl App {
     pub(super) fn start_new_patient(&mut self) {
@@ -33,7 +32,7 @@ impl App {
     pub(super) fn delete_active(&mut self) {
         let id = self.active_patient.id.clone();
         self.patients.retain(|p| p.id != id);
-        let _ = save_patients(&self.patients);
+        let _ = self.save(&self.patients);
         self.page = Page::Home;
     }
 
@@ -54,7 +53,7 @@ impl App {
         } else {
             list.push(curr);
         }
-        if save_patients(&list).is_ok() {
+        if self.save(&list).is_ok() {
             self.patients = list;
             self.page = Page::Home;
             true

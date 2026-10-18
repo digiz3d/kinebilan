@@ -35,7 +35,7 @@ impl<'a> Gui<'a> {
             if let Some((px, py)) = pointer {
                 let lines = wrap_spans(font, value, wrap_w);
                 let row = ((py - text_y) / lh).clamp(0, lines.len() as i32 - 1) as usize;
-                let i = index_at(font, value, lines[row], px - text_x);
+                let i = index_at(font, value, lines[row], px - text_x, false);
                 self.place_caret(value, i, lines[row], click.is_some());
             }
             self.apply_input(font, value, Some(wrap_w), Charset::Text);
@@ -48,7 +48,7 @@ impl<'a> Gui<'a> {
             self.text(font, placeholder, text_x, text_y, PLACEHOLDER);
         }
         for (i, line) in wrap_spans(font, value, wrap_w).into_iter().enumerate() {
-            self.edit_line(font, value, line, text_x, text_y + i as i32 * lh, lh, focused);
+            self.edit_line(font, value, line, text_x, text_y + i as i32 * lh, lh, focused, false);
         }
 
         h
