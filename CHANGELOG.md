@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.3.0...kinebilan-v0.4.0) (2026-10-18)
+
+
+### Features
+
+* sticky menu bar on patient screen ([#10](https://github.com/digiz3d/kinebilan/issues/10)) ([9fd190c](https://github.com/digiz3d/kinebilan/commit/9fd190cf4d0df435db5eafec60973f4b78d4f157))
+
 ## [0.3.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.2.0...kinebilan-v0.3.0) (2026-10-18)
 
 
