@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.1.0...kinebilan-v0.2.0) (2026-10-18)
+
+
+### Features
+
+* design and allow updating past sessions ([652f51e](https://github.com/digiz3d/kinebilan/commit/652f51e71aecb37fc9bb4aabd769fcf11a4daf4f))
+* rework data fields ([3c0917b](https://github.com/digiz3d/kinebilan/commit/3c0917b264d38499c24ba3ea1b183a1824634f1e))
+
 ## [0.1.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.0.1...kinebilan-v0.1.0) (2026-10-18)
 
 
