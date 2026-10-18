@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use std::path::PathBuf;
 use dioxus::desktop::{Config, WindowBuilder};
 use dioxus::prelude::*;
