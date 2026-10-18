@@ -1,9 +1,18 @@
 name: Build
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Release tag to upload the built binaries to (leave empty to only build artifacts)
+        type: string
+        default: ""
+  workflow_call:
+    inputs:
+      tag_name:
+        description: Release tag to upload the built binaries to
+        type: string
+        default: ""
 
 env:
   CARGO_TERM_COLOR: always
@@ -17,6 +26,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag_name }}
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -40,11 +51,21 @@ jobs:
           path: ${{ env.APP_NAME }}-windows-x64.zip
           if-no-files-found: error
 
+      - name: Upload to release
+        if: inputs.tag_name != ''
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ inputs.tag_name }}
+        run: gh release upload $env:TAG_NAME "${{ env.APP_NAME }}-windows-x64.zip" --clobber
+
   macos:
     name: macOS universal
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag_name }}
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -106,3 +127,10 @@ jobs:
           name: ${{ env.APP_NAME }}-macos-universal
           path: ${{ env.APP_NAME }}-macos-universal.dmg
           if-no-files-found: error
+
+      - name: Upload to release
+        if: inputs.tag_name != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ inputs.tag_name }}
+        run: gh release upload "$TAG_NAME" "${APP_NAME}-macos-universal.dmg" --clobber
