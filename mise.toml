@@ -1,5 +1,6 @@
 [tools]
-rust = "latest"
+cmake = "4.4.4"
+rust = "1.99.1"
 
 [tasks.udeps]
 description = "Find unused dependencies (requires nightly toolchain and cargo-udeps)"

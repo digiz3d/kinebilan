@@ -161,6 +161,7 @@ version = "0.0.1"
 dependencies = [
  "chrono",
  "sdl3",
+ "sdl3-sys",
  "serde",
  "serde_json",
  "uuid",
