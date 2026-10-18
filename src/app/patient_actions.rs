@@ -18,6 +18,7 @@ impl App {
     fn open_form(&mut self) {
         self.validation_error = None;
         self.show_session_modal = false;
+        self.show_leave_modal = false;
         self.new_session_notes.clear();
         self.new_session_objectives.clear();
         self.new_session_content.clear();
@@ -34,6 +35,18 @@ impl App {
         self.patients.retain(|p| p.id != id);
         let _ = self.save(&self.patients);
         self.page = Page::Home;
+    }
+
+    pub(super) fn has_unsaved_changes(&self) -> bool {
+        let mut current = self.active_patient.clone();
+        current.sort_sessions();
+        let saved = self
+            .patients
+            .iter()
+            .find(|p| p.id == current.id)
+            .cloned()
+            .unwrap_or_else(|| Patient { id: current.id.clone(), ..Default::default() });
+        current != saved
     }
 
     pub(super) fn save_active(&mut self) -> bool {
