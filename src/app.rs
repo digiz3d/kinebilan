@@ -1,6 +1,7 @@
 mod clinical;
 mod form_footer;
 mod identity;
+mod load_error;
 mod patient_actions;
 mod patient_form;
 mod patient_list;
@@ -38,6 +39,8 @@ enum FormAction {
 
 pub struct App {
     patients: Vec<Patient>,
+    load_error: Option<String>,
+    quit_requested: bool,
     page: Page,
     search_query: String,
     active_patient: Patient,
@@ -57,8 +60,14 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
+        let (patients, load_error) = match load_patients() {
+            Ok(patients) => (patients, None),
+            Err(error) => (Vec::new(), Some(error.to_string())),
+        };
         Self {
-            patients: load_patients(),
+            patients,
+            load_error,
+            quit_requested: false,
             page: Page::Home,
             search_query: String::new(),
             active_patient: Patient::default(),
@@ -77,10 +86,19 @@ impl App {
         }
     }
 
+    pub fn quit_requested(&self) -> bool {
+        self.quit_requested
+    }
+
     pub fn draw(&mut self, gui: &mut Gui, fonts: &Fonts, screen: Rect) {
         gui.fill(screen, BG);
         let card = Rect::new(0, 0, screen.w, screen.h);
         gui.fill_bordered(card, WHITE, BORDER);
+
+        if self.load_error.is_some() {
+            self.draw_load_error(gui, fonts, screen);
+            return;
+        }
 
         match self.page {
             Page::Home => self.draw_home(gui, fonts, card.inset(CARD_PADDING)),
