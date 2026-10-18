@@ -27,6 +27,7 @@ impl<'a> Gui<'a> {
             return;
         }
         self.caret.end_typing();
+        self.caret.blink_reset = true;
         self.caret.dragging = true;
         self.caret.clicks = self.input.clicks;
         match self.input.clicks {

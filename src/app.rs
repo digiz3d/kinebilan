@@ -16,7 +16,6 @@ use crate::ui::*;
 const CARD_PADDING: i32 = 28;
 const BOX_PADDING: i32 = 18;
 const BOX_GAP: i32 = 14;
-const MAX_CONTENT_WIDTH: i32 = 900;
 
 #[derive(Clone, Copy, PartialEq)]
 enum Page {
@@ -68,8 +67,7 @@ impl App {
 
     pub fn draw(&mut self, gui: &mut Gui, fonts: &Fonts, screen: Rect) {
         gui.fill(screen, BG);
-        let card_w = (screen.w - 32).min(MAX_CONTENT_WIDTH);
-        let card = Rect::new((screen.w - card_w) / 2, 24, card_w, (screen.h - 48).max(0));
+        let card = Rect::new(0, 0, screen.w, screen.h);
         gui.fill_bordered(card, WHITE, BORDER);
 
         match self.page {
