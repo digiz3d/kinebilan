@@ -1,0 +1,34 @@
+use sdl3::pixels::Color;
+
+pub const PAD_X: i32 = 12;
+pub const PAD_Y: i32 = 10;
+
+pub const BG: Color = Color::RGB(243, 244, 246);
+pub const WHITE: Color = Color::RGB(255, 255, 255);
+pub const TITLE: Color = Color::RGB(17, 24, 39);
+pub const TEXT: Color = Color::RGB(31, 41, 55);
+pub const LABEL: Color = Color::RGB(55, 65, 81);
+pub const MUTED: Color = Color::RGB(107, 114, 128);
+pub const PLACEHOLDER: Color = Color::RGB(156, 163, 175);
+pub const BORDER: Color = Color::RGB(229, 231, 235);
+pub const DIVIDER: Color = Color::RGB(243, 244, 246);
+pub const INPUT_BORDER: Color = Color::RGB(209, 213, 219);
+pub const ACCENT: Color = Color::RGB(37, 99, 235);
+pub const ACCENT_HOVER: Color = Color::RGB(29, 78, 216);
+pub const ACCENT_SOFT: Color = Color::RGB(239, 246, 255);
+pub const ACCENT_BORDER_SOFT: Color = Color::RGB(147, 197, 253);
+pub const ITEM_BG: Color = Color::RGB(250, 250, 250);
+pub const BOX_BG: Color = Color::RGB(250, 251, 252);
+pub const SESSION_DATE: Color = Color::RGB(30, 64, 175);
+pub const BADGE_BG: Color = Color::RGB(224, 242, 254);
+pub const BADGE_TEXT: Color = Color::RGB(3, 105, 161);
+pub const ALERT_BG: Color = Color::RGB(254, 242, 242);
+pub const ALERT_BORDER: Color = Color::RGB(254, 202, 202);
+pub const ALERT_TEXT: Color = Color::RGB(185, 28, 28);
+pub const SECONDARY_BG: Color = Color::RGB(229, 231, 235);
+pub const SECONDARY_HOVER: Color = Color::RGB(209, 213, 219);
+pub const DANGER_BG: Color = Color::RGB(254, 226, 226);
+pub const DANGER_HOVER: Color = Color::RGB(254, 202, 202);
+pub const DANGER_BORDER: Color = Color::RGB(252, 165, 165);
+pub const DANGER_STRONG: Color = Color::RGB(220, 38, 38);
+pub const BACKDROP: Color = Color::RGBA(0, 0, 0, 102);
