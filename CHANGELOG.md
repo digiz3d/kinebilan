@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.2.0...kinebilan-v0.3.0) (2026-10-18)
+
+
+### Features
+
+* encrypted save files ([#9](https://github.com/digiz3d/kinebilan/issues/9)) ([85444cc](https://github.com/digiz3d/kinebilan/commit/85444cca6627223063e6835b411d674e0bf9f1ab))
+* new saves system ([#7](https://github.com/digiz3d/kinebilan/issues/7)) ([2e6584d](https://github.com/digiz3d/kinebilan/commit/2e6584d540cb6c6de530f7512fb24b24539397ee))
+
 ## [0.2.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.1.0...kinebilan-v0.2.0) (2026-10-18)
 
 
