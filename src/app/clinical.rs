@@ -9,26 +9,26 @@ impl App {
         let inner_w = w - 2 * BOX_PADDING;
         let heading_h = line_height(&fonts.section);
         let group_pitch = label_h + 6;
-        let p = &self.active_patient;
-        let areas_h: i32 = [&p.prior_issues, &p.symptoms, &p.goals]
-            .iter()
-            .map(|t| group_pitch + area_height(&fonts.body, t, inner_w, 3))
-            .sum();
-        let clinical_h = 2 * BOX_PADDING + heading_h + BOX_GAP + areas_h + 2 * BOX_GAP;
+        let areas_h = 3 * group_pitch
+            + area_height(&fonts.body, &self.active_patient.antecedents, inner_w, 3)
+            + area_height(&fonts.body, &self.active_patient.symptoms, inner_w, 3)
+            + area_height(&fonts.body, &self.active_patient.treatment_objective, inner_w, 3)
+            + 2 * BOX_GAP;
+        let clinical_h = 2 * BOX_PADDING + heading_h + BOX_GAP + areas_h;
         gui.fill_bordered(Rect::new(x, y, w, clinical_h), BOX_BG, BORDER);
         let bx = x + BOX_PADDING;
         let mut by = y + BOX_PADDING;
         gui.text(&fonts.section, "Bilan clinique", bx, by, TITLE);
         by += heading_h + BOX_GAP;
 
-        gui.text(&fonts.label, "Antécédents / Prior issues", bx, by, LABEL);
+        gui.text(&fonts.label, "Antécédents", bx, by, LABEL);
         by += group_pitch;
         by += gui.text_area(
-            Field::PriorIssues,
+            Field::Antecedents,
             bx,
             by,
             inner_w,
-            &mut self.active_patient.prior_issues,
+            &mut self.active_patient.antecedents,
             "Antécédents médicaux, chirurgicaux, traumatismes...",
             &fonts.body,
             3,
@@ -47,15 +47,15 @@ impl App {
             3,
         ) + BOX_GAP;
 
-        gui.text(&fonts.label, "Objectifs thérapeutiques", bx, by, LABEL);
+        gui.text(&fonts.label, "Objectif de la prise en charge", bx, by, LABEL);
         by += group_pitch;
         gui.text_area(
-            Field::Goals,
+            Field::TreatmentObjective,
             bx,
             by,
             inner_w,
-            &mut self.active_patient.goals,
-            "Objectifs du patient et plan de rééducation...",
+            &mut self.active_patient.treatment_objective,
+            "Objectif global du traitement de rééducation...",
             &fonts.body,
             3,
         );

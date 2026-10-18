@@ -50,13 +50,16 @@ mod tests {
             last_name: "Dupont".into(),
             first_name: "Jean".into(),
             birth_date: "1985-04-12".into(),
-            prior_issues: "Lombalgie chronique".into(),
+            care_type: "Lombalgie".into(),
+            antecedents: "Lombalgie chronique".into(),
             symptoms: "Douleur L4-L5".into(),
-            goals: "Reprise course à pied".into(),
+            treatment_objective: "Reprise course à pied".into(),
             sessions: vec![Session {
                 id: "s-1".into(),
                 date: "2026-10-20".into(),
-                notes: "Mobilisation lombaire et gainage".into(),
+                notes: "Patient motivé".into(),
+                objectives: "Mobilité lombaire".into(),
+                content: "Mobilisation lombaire et gainage".into(),
             }],
         };
 

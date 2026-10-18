@@ -53,6 +53,19 @@ impl App {
             let p = &self.patients[index];
             let name = format!("{} {}", p.last_name.to_uppercase(), p.first_name);
             gui.text(&fonts.section, &name, item.x + 18, item.y + 14, TEXT);
+            if !p.care_type.trim().is_empty() {
+                let (name_w, name_h) = measure(&fonts.section, &name);
+                let (care_w, _) = measure(&fonts.badge, &p.care_type);
+                let tag_h = 20;
+                let tag = Rect::new(
+                    item.x + 18 + name_w + 10,
+                    item.y + 14 + (name_h - tag_h) / 2,
+                    care_w + 16,
+                    tag_h,
+                );
+                gui.fill(tag, SECONDARY_BG);
+                gui.text_centered(&fonts.badge, &p.care_type, tag, LABEL);
+            }
             let dob = format!("Né(e) le: {}", p.birth_date);
             gui.text(&fonts.small, &dob, item.x + 18, item.y + 42, MUTED);
 
@@ -66,7 +79,7 @@ impl App {
                 open = Some(index);
             }
         }
-        gui.scrollbar(Rect::new(list.right() - 6, list.y, 4, list.h), self.patients_scroll, content_h);
+        gui.scrollbar(Rect::new(list.right() - 6, list.y, 4, list.h), list.h, self.patients_scroll, content_h);
         gui.pop_clip();
         gui.outline(list, INPUT_BORDER);
 

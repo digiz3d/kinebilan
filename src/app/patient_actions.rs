@@ -20,6 +20,8 @@ impl App {
         self.validation_error = None;
         self.show_session_modal = false;
         self.new_session_notes.clear();
+        self.new_session_objectives.clear();
+        self.new_session_content.clear();
         self.editing_session = None;
         self.confirm_delete_session = None;
         self.confirm_delete = false;

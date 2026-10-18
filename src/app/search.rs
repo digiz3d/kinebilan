@@ -10,6 +10,7 @@ impl App {
                 query.trim().is_empty()
                     || fold_accents(&p.last_name).contains(&query)
                     || fold_accents(&p.first_name).contains(&query)
+                    || fold_accents(&p.care_type).contains(&query)
             })
             .map(|(i, _)| i)
             .collect()

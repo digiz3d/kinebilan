@@ -148,13 +148,13 @@ impl<'a> Gui<'a> {
         delta
     }
 
-    pub fn scrollbar(&mut self, track: Rect, offset: i32, content_h: i32) {
-        if content_h <= track.h {
+    pub fn scrollbar(&mut self, track: Rect, viewport_h: i32, offset: i32, content_h: i32) {
+        if content_h <= viewport_h {
             return;
         }
-        let thumb_h = (track.h * track.h / content_h).max(24);
+        let thumb_h = (track.h * viewport_h / content_h).max(24);
         let travel = track.h - thumb_h;
-        let max_offset = content_h - track.h;
+        let max_offset = content_h - viewport_h;
         let thumb_y = track.y + travel * offset / max_offset;
         self.fill(Rect::new(track.x, thumb_y, track.w, thumb_h), INPUT_BORDER);
     }

@@ -11,11 +11,29 @@ impl App {
         let dialog_w = 480.min(screen.w * 9 / 10);
         let inner_w = dialog_w - 2 * pad;
         let title_h = line_height(&fonts.modal_title);
-        let notes_h = area_height(&fonts.body, &self.new_session_notes, inner_w, 4);
+        let notes_h = area_height(&fonts.body, &self.new_session_notes, inner_w, 3);
+        let objectives_h = area_height(&fonts.body, &self.new_session_objectives, inner_w, 3);
+        let content_h = area_height(&fonts.body, &self.new_session_content, inner_w, 4);
         let label_h = line_height(&fonts.label);
-        let date_h = label_h + 6 + 40;
+        let label_pitch = label_h + 6;
+        let date_h = label_pitch + 40;
         let button_h = 40;
-        let dialog_h = pad + title_h + 16 + date_h + 16 + notes_h + 16 + button_h + pad;
+        let dialog_h = pad
+            + title_h
+            + 16
+            + date_h
+            + 16
+            + label_pitch
+            + notes_h
+            + 16
+            + label_pitch
+            + objectives_h
+            + 16
+            + label_pitch
+            + content_h
+            + 16
+            + button_h
+            + pad;
         let dialog = Rect::new(
             screen.x + (screen.w - dialog_w) / 2,
             screen.y + (screen.h - dialog_h) / 2,
@@ -48,17 +66,43 @@ impl App {
             gui.text(&fonts.label, "Date invalide", x + 212, date_y + 12, ALERT_TEXT);
         }
         y += date_h + 16;
-        gui.text_area(
+        gui.text(&fonts.label, "Notes", x, y, LABEL);
+        y += label_pitch;
+        y += gui.text_area(
             Field::SessionNotes,
             x,
             y,
             inner_w,
             &mut self.new_session_notes,
+            "Remarques générales sur la séance...",
+            &fonts.body,
+            3,
+        ) + 16;
+        gui.text(&fonts.label, "Objectifs de la séance", x, y, LABEL);
+        y += label_pitch;
+        y += gui.text_area(
+            Field::SessionObjectives,
+            x,
+            y,
+            inner_w,
+            &mut self.new_session_objectives,
+            "Objectifs de la séance et plan de rééducation...",
+            &fonts.body,
+            3,
+        ) + 16;
+        gui.text(&fonts.label, "Contenu de la séance", x, y, LABEL);
+        y += label_pitch;
+        gui.text_area(
+            Field::SessionContent,
+            x,
+            y,
+            inner_w,
+            &mut self.new_session_content,
             "Qu'avez-vous fait pendant cette séance...",
             &fonts.body,
             4,
         );
-        y += notes_h + 16;
+        y += content_h + 16;
 
         let save_rect = Rect::new(dialog.right() - pad - 170, y, 170, button_h);
         let cancel_rect = Rect::new(save_rect.x - 10 - 110, y, 110, button_h);

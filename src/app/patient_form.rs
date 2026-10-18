@@ -1,3 +1,4 @@
+use super::form_footer::FOOTER_H;
 use super::{App, FormAction, Page, CARD_PADDING};
 use crate::focus::Field;
 use crate::ui::*;
@@ -41,7 +42,8 @@ impl App {
 
         y += self.draw_clinical(gui, fonts, x, y, w) + 20;
 
-        let (sessions_h, sessions_action) = self.draw_sessions(gui, fonts, x, y, w);
+        let sessions_fill_h = viewport.bottom() - (y + self.form_scroll) - 20 - FOOTER_H;
+        let (sessions_h, sessions_action) = self.draw_sessions(gui, fonts, x, y, w, sessions_fill_h);
         if sessions_action != FormAction::None {
             action = sessions_action;
         }
@@ -57,7 +59,7 @@ impl App {
         let content_h = content_bottom - viewport.y;
         let delta = gui.take_scroll(card);
         self.form_scroll = clamp_scroll(self.form_scroll, delta, content_h, viewport.h);
-        gui.scrollbar(Rect::new(card.right() - 6, viewport.y, 4, viewport.h), self.form_scroll, content_h);
+        gui.scrollbar(Rect::new(card.right() - 6, card.y, 4, card.h), viewport.h, self.form_scroll, content_h);
         gui.pop_clip();
 
         gui.set_interactive(true);
@@ -86,6 +88,8 @@ impl App {
             FormAction::OpenSessionModal => {
                 self.new_session_date = chrono::Local::now().format("%Y-%m-%d").to_string();
                 self.new_session_notes.clear();
+                self.new_session_objectives.clear();
+                self.new_session_content.clear();
                 self.editing_session = None;
                 self.show_session_modal = true;
                 gui.focus = Some(Field::SessionNotes);
@@ -94,6 +98,8 @@ impl App {
                 let session = &self.active_patient.sessions[idx];
                 self.new_session_date = session.date.clone();
                 self.new_session_notes = session.notes.clone();
+                self.new_session_objectives = session.objectives.clone();
+                self.new_session_content = session.content.clone();
                 self.editing_session = Some(idx);
                 self.show_session_modal = true;
                 gui.focus = Some(Field::SessionNotes);

@@ -4,20 +4,24 @@ pub enum Field {
     LastName,
     FirstName,
     BirthDate,
-    PriorIssues,
+    CareType,
+    Antecedents,
     Symptoms,
-    Goals,
+    TreatmentObjective,
     SessionDate,
     SessionNotes,
+    SessionObjectives,
+    SessionContent,
 }
 
-const FORM_TAB_ORDER: [Field; 6] = [
+const FORM_TAB_ORDER: [Field; 7] = [
     Field::LastName,
     Field::FirstName,
     Field::BirthDate,
-    Field::PriorIssues,
+    Field::CareType,
+    Field::Antecedents,
     Field::Symptoms,
-    Field::Goals,
+    Field::TreatmentObjective,
 ];
 
 impl Field {

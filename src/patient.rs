@@ -1,10 +1,15 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct Session {
     pub id: String,
     pub date: String,
+    #[serde(default)]
     pub notes: String,
+    #[serde(default)]
+    pub objectives: String,
+    #[serde(default)]
+    pub content: String,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
@@ -13,9 +18,14 @@ pub struct Patient {
     pub last_name: String,
     pub first_name: String,
     pub birth_date: String,
-    pub prior_issues: String,
+    #[serde(default)]
+    pub care_type: String,
+    #[serde(default, alias = "prior_issues")]
+    pub antecedents: String,
+    #[serde(default)]
     pub symptoms: String,
-    pub goals: String,
+    #[serde(default)]
+    pub treatment_objective: String,
     pub sessions: Vec<Session>,
 }
 

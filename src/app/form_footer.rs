@@ -1,6 +1,8 @@
 use super::{App, FormAction};
 use crate::ui::*;
 
+pub(super) const FOOTER_H: i32 = 58;
+
 impl App {
     /// Draws the delete and save buttons at y and returns the requested action and the bottom edge.
     pub(super) fn draw_form_footer(&mut self, gui: &mut Gui, fonts: &Fonts, x: i32, y: i32, w: i32) -> (FormAction, i32) {
@@ -42,6 +44,6 @@ impl App {
         ) {
             action = FormAction::Save;
         }
-        (action, button_y + button_h)
+        (action, y + FOOTER_H)
     }
 }
