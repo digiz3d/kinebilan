@@ -3,6 +3,9 @@ name = "kinebilan"
 version = "0.5.0"
 edition = "2024"
 
+[build-dependencies]
+winresource = "0.1"
+
 [dependencies]
 sdl3 = { version = "0.20", features = ["build-from-source-static", "ttf"] }
 sdl3-sys = { version = "0.7", features = ["no-sdl-audio", "no-sdl-joystick", "no-sdl-haptic", "no-sdl-hidapi", "no-sdl-camera", "no-sdl-gpu", "no-sdl-sensor", "no-sdl-power", "no-sdl-dialog", "no-sdl-tray"] }

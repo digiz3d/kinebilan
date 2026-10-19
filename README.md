@@ -1,5 +1,9 @@
 # KinéBilan
 
+<p align="center">
+  <img src="assets/icon.png" alt="KinéBilan icon" width="128">
+</p>
+
 A small desktop app for managing physiotherapy patients and their treatment sessions.
 
 ## Features
