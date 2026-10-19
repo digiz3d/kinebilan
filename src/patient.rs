@@ -35,9 +35,26 @@ impl Patient {
         self.sessions.sort_by(|a, b| b.date.cmp(&a.date));
     }
 
-    /// Normalizes fields that require a fixed format: the last name is always uppercase.
+    /// Normalizes fields that require a fixed format: the last name is always uppercase,
+    /// the first name always starts with an uppercase letter.
     pub fn normalize(&mut self) {
         self.last_name = self.last_name.trim().to_uppercase();
+        self.first_name = capitalize_first(&self.first_name);
+    }
+
+    /// The first name as it should be displayed, with an uppercase first letter.
+    pub fn display_first_name(&self) -> String {
+        capitalize_first(&self.first_name)
+    }
+}
+
+/// Uppercases the first letter of `s`, leaving the rest untouched.
+fn capitalize_first(s: &str) -> String {
+    let s = s.trim_start();
+    let mut chars = s.chars();
+    match chars.next() {
+        Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+        None => String::new(),
     }
 }
 

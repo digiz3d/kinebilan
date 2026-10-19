@@ -51,7 +51,7 @@ impl App {
             );
 
             let p = &self.patients[index];
-            let name = format!("{} {}", p.last_name.to_uppercase(), p.first_name);
+            let name = format!("{} {}", p.last_name.to_uppercase(), p.display_first_name());
             gui.text(&fonts.section, &name, item.x + 18, item.y + 14, TEXT);
             if !p.care_type.trim().is_empty() {
                 let (name_w, name_h) = measure(&fonts.section, &name);
