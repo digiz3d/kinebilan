@@ -1,5 +1,6 @@
 mod v0_to_v1;
 mod v1_to_v2;
+mod v2_to_v3;
 
 use serde_json::Value;
 
@@ -10,6 +11,7 @@ pub fn step(version: u32) -> Option<Step> {
     match version {
         0 => Some(v0_to_v1::migrate),
         1 => Some(v1_to_v2::migrate),
+        2 => Some(v2_to_v3::migrate),
         _ => None,
     }
 }

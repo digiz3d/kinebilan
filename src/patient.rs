@@ -19,6 +19,8 @@ pub struct Patient {
     pub first_name: String,
     /// Birth date as `dd/mm/yyyy`.
     pub birth_date: String,
+    /// Date the patient was created, as `dd/mm/yyyy`. Empty when unknown.
+    pub creation_date: String,
     #[serde(default)]
     pub care_type: String,
     #[serde(default, alias = "prior_issues")]

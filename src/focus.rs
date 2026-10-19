@@ -7,6 +7,7 @@ pub enum Field {
     FirstName,
     BirthDate,
     CareType,
+    CreationDate,
     Antecedents,
     Symptoms,
     TreatmentObjective,
@@ -16,11 +17,12 @@ pub enum Field {
     SessionContent,
 }
 
-const FORM_TAB_ORDER: [Field; 7] = [
+const FORM_TAB_ORDER: [Field; 8] = [
     Field::LastName,
     Field::FirstName,
     Field::BirthDate,
     Field::CareType,
+    Field::CreationDate,
     Field::Antecedents,
     Field::Symptoms,
     Field::TreatmentObjective,

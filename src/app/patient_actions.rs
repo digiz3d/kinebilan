@@ -5,6 +5,7 @@ impl App {
     pub(super) fn start_new_patient(&mut self) {
         self.active_patient = Patient {
             id: uuid::Uuid::new_v4().to_string(),
+            creation_date: chrono::Local::now().format("%d/%m/%Y").to_string(),
             ..Default::default()
         };
         self.open_form();
@@ -63,6 +64,10 @@ impl App {
         }
         if !is_valid_date(&curr.birth_date) {
             self.validation_error = Some("La date de naissance doit être au format JJ/MM/AAAA.".into());
+            return false;
+        }
+        if !curr.creation_date.trim().is_empty() && !is_valid_date(&curr.creation_date) {
+            self.validation_error = Some("La date de création doit être au format JJ/MM/AAAA.".into());
             return false;
         }
         let mut list = self.patients.clone();
