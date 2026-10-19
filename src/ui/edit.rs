@@ -3,7 +3,7 @@ use sdl3::ttf::Font;
 
 use crate::focus::Field;
 
-use super::charset::Charset;
+use super::charset::{format_birth_date, Charset};
 use super::geometry::Rect;
 use super::gui::Gui;
 use super::text::{index_at, line_of, measure, shown, word_span, wrap_spans};
@@ -60,13 +60,21 @@ impl<'a> Gui<'a> {
             return false;
         }
         let mut changed = self.caret.delete_sel(value);
-        let room = charset.max_len().saturating_sub(value.chars().count());
+        let room = charset.room(value);
         let clean: String = accepted.chars().take(room).collect();
         if !clean.is_empty() {
             self.caret.insert(value, &clean);
             changed = true;
         }
         changed
+    }
+
+    /// Whether the collapsed caret sits right after (`back`) or right before a `/` separator.
+    fn at_separator(&self, value: &str, charset: Charset, back: bool) -> bool {
+        let (lo, hi) = self.caret.sel();
+        charset == Charset::BirthDate
+            && lo == hi
+            && if back { value[..lo].ends_with('/') } else { value[lo..].starts_with('/') }
     }
 
     fn move_row(&mut self, font: &Font, value: &str, wrap_w: i32, down: bool) {
@@ -103,8 +111,20 @@ impl<'a> Gui<'a> {
         let mut edited = false;
         for key in keys {
             edited |= match key {
-                Keycode::Backspace => self.caret.delete(value, true),
-                Keycode::Delete => self.caret.delete(value, false),
+                Keycode::Backspace => {
+                    if self.at_separator(value, charset, true) {
+                        self.caret.nav(value, false, false);
+                    }
+                    self.caret.delete(value, true)
+                }
+                Keycode::Delete => {
+                    if self.at_separator(value, charset, false) {
+                        self.caret.nav(value, true, false);
+                        false
+                    } else {
+                        self.caret.delete(value, false)
+                    }
+                }
                 Keycode::Return | Keycode::KpEnter => self.type_text(value, "\n", multiline, charset),
                 Keycode::Left | Keycode::Right => {
                     self.caret.nav(value, key == Keycode::Right, shift);
@@ -147,6 +167,11 @@ impl<'a> Gui<'a> {
         }
         let changed = typed || edited;
         if changed {
+            if charset == Charset::BirthDate {
+                let (formatted, cursor) = format_birth_date(value, self.caret.cursor);
+                *value = formatted;
+                self.caret.select_to(cursor, false);
+            }
             if let Some(before) = before {
                 self.caret.record(before, typed && text_only);
             }

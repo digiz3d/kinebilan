@@ -1,5 +1,5 @@
 use super::{App, Page};
-use crate::patient::Patient;
+use crate::patient::{is_valid_date, Patient};
 
 impl App {
     pub(super) fn start_new_patient(&mut self) {
@@ -59,6 +59,10 @@ impl App {
         {
             self.validation_error =
                 Some("Le nom, prénom et la date de naissance sont obligatoires.".into());
+            return false;
+        }
+        if !is_valid_date(&curr.birth_date) {
+            self.validation_error = Some("La date de naissance doit être au format JJ/MM/AAAA.".into());
             return false;
         }
         let mut list = self.patients.clone();

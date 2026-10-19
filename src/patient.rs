@@ -17,6 +17,7 @@ pub struct Patient {
     pub id: String,
     pub last_name: String,
     pub first_name: String,
+    /// Birth date as `dd/mm/yyyy`.
     pub birth_date: String,
     #[serde(default)]
     pub care_type: String,
@@ -48,6 +49,11 @@ impl Patient {
     }
 }
 
+/// Whether `text` is a real date written as `dd/mm/yyyy`.
+pub fn is_valid_date(text: &str) -> bool {
+    text.len() == 10 && chrono::NaiveDate::parse_from_str(text, "%d/%m/%Y").is_ok()
+}
+
 /// Uppercases the first letter of `s`, leaving the rest untouched.
 fn capitalize_first(s: &str) -> String {
     let s = s.trim_start();
@@ -68,7 +74,7 @@ mod tests {
             id: "1".into(),
             last_name: "".into(),
             first_name: "Jean".into(),
-            birth_date: "1990-01-01".into(),
+            birth_date: "01/01/1990".into(),
             ..Default::default()
         };
         let is_valid = |p: &Patient| {
@@ -82,10 +88,20 @@ mod tests {
             id: "2".into(),
             last_name: "Dupont".into(),
             first_name: "Jean".into(),
-            birth_date: "1990-01-01".into(),
+            birth_date: "01/01/1990".into(),
             ..Default::default()
         };
         assert!(is_valid(&valid));
+    }
+
+    #[test]
+    fn test_date_validation() {
+        assert!(is_valid_date("01/01/1990"));
+        assert!(is_valid_date("29/02/2024"));
+        assert!(!is_valid_date("29/02/2023"));
+        assert!(!is_valid_date("01/0/1990"));
+        assert!(!is_valid_date("1990-01-01"));
+        assert!(!is_valid_date(""));
     }
 
     #[test]

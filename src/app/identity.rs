@@ -39,9 +39,9 @@ impl App {
             Field::BirthDate,
             Rect::new(cols[2], field_y, col_w, field_h),
             &mut self.active_patient.birth_date,
-            "AAAA-MM-JJ",
+            "JJ/MM/AAAA",
             &fonts.body,
-            Charset::Date,
+            Charset::BirthDate,
         ) {
             self.validation_error = None;
         }

@@ -9,7 +9,7 @@ use serde_json::{Value, json};
 
 use crate::patient::Patient;
 
-pub const CURRENT_VERSION: u32 = 1;
+pub const CURRENT_VERSION: u32 = 2;
 const KDF: &str = "argon2id";
 
 #[derive(Debug)]
@@ -293,6 +293,25 @@ mod tests {
   }
 ]"#;
 
+    const V1_FILE: &str = r#"{
+  "version": 1,
+  "patients": [
+    {
+      "id": "p-1",
+      "last_name": "Dupont",
+      "first_name": "Jean",
+      "birth_date": "12041985",
+      "care_type": "Lombalgie",
+      "antecedents": "Lombalgie chronique",
+      "symptoms": "",
+      "treatment_objective": "",
+      "sessions": [
+        { "id": "s-1", "date": "2026-10-20", "notes": "Patient motivé" }
+      ]
+    }
+  ]
+}"#;
+
     fn temp_patients_file() -> (PathBuf, PathBuf) {
         let dir = std::env::temp_dir().join(format!("kinebilan_test_{}", uuid::Uuid::new_v4()));
         (dir.clone(), dir.join("patients.json"))
@@ -303,7 +322,7 @@ mod tests {
             id: "p-1".into(),
             last_name: "Dupont".into(),
             first_name: "Jean".into(),
-            birth_date: "1985-04-12".into(),
+            birth_date: "12/04/1985".into(),
             care_type: "Lombalgie".into(),
             antecedents: "Lombalgie chronique".into(),
             symptoms: "Douleur L4-L5".into(),
@@ -365,6 +384,24 @@ mod tests {
         let content = std::fs::read_to_string(&file_path).unwrap();
         assert!(!content.contains("Dupont"));
         assert!(matches!(stored_from(&file_path), Ok(Stored::Encrypted)));
+        assert_eq!(unlock_from(&file_path, PASSWORD).unwrap().1, loaded);
+
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_v1_file_is_converted_and_backed_up() {
+        let (temp_dir, file_path) = temp_patients_file();
+        std::fs::create_dir_all(&temp_dir).unwrap();
+        std::fs::write(&file_path, V1_FILE).unwrap();
+
+        let (_, loaded) = create_from(&file_path, PASSWORD).expect("Failed to convert v1 file");
+        assert_eq!(loaded.len(), 1);
+        assert_eq!(loaded[0].birth_date, "12/04/1985");
+        assert_eq!(loaded[0].sessions[0].notes, "Patient motivé");
+
+        let backup = temp_dir.join("patients.json.bak-v1");
+        assert_eq!(std::fs::read_to_string(&backup).unwrap(), V1_FILE);
         assert_eq!(unlock_from(&file_path, PASSWORD).unwrap().1, loaded);
 
         let _ = std::fs::remove_dir_all(&temp_dir);
