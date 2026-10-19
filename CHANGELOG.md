@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.5.0...kinebilan-v0.6.0) (2026-10-19)
+
+
+### Features
+
+* new icon ([7765f36](https://github.com/digiz3d/kinebilan/commit/7765f36ab399e54e8e84108245476bb2e61dc373))
+
 ## [0.5.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.4.0...kinebilan-v0.5.0) (2026-10-19)
 
 
