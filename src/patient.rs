@@ -34,6 +34,11 @@ impl Patient {
     pub fn sort_sessions(&mut self) {
         self.sessions.sort_by(|a, b| b.date.cmp(&a.date));
     }
+
+    /// Normalizes fields that require a fixed format: the last name is always uppercase.
+    pub fn normalize(&mut self) {
+        self.last_name = self.last_name.trim().to_uppercase();
+    }
 }
 
 #[cfg(test)]

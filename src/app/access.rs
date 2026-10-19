@@ -2,6 +2,7 @@ use sdl3::keyboard::Keycode;
 
 use super::{Access, App};
 use crate::focus::Field;
+use crate::patient::Patient;
 use crate::storage::{create_vault, save_patients, unlock, Vault};
 use crate::ui::*;
 
@@ -140,6 +141,7 @@ impl App {
     fn open_vault(&mut self, vault: Vault, patients: Vec<crate::patient::Patient>) {
         self.vault = Some(vault);
         self.patients = patients;
+        self.patients.iter_mut().for_each(Patient::normalize);
         self.password.clear();
         self.password_confirm.clear();
         self.access_error = None;

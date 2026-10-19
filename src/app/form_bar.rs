@@ -32,7 +32,7 @@ impl App {
         } else {
             format!(
                 "Fiche patient : {} {}",
-                self.active_patient.last_name, self.active_patient.first_name
+                self.active_patient.last_name.to_uppercase(), self.active_patient.first_name
             )
         };
         let side = 110.max(save_w) + 16;

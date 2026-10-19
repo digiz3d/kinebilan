@@ -52,6 +52,7 @@ impl App {
     pub(super) fn save_active(&mut self) -> bool {
         let mut curr = self.active_patient.clone();
         curr.sort_sessions();
+        curr.normalize();
         if curr.last_name.trim().is_empty()
             || curr.first_name.trim().is_empty()
             || curr.birth_date.trim().is_empty()
