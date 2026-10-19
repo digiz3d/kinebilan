@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.4.0...kinebilan-v0.5.0) (2026-10-19)
+
+
+### Features
+
+* easier birthdate input ([07ee0a2](https://github.com/digiz3d/kinebilan/commit/07ee0a2e282dde68400d4d4279cd30ceff365a23))
+* patient creation date ([53a75df](https://github.com/digiz3d/kinebilan/commit/53a75df1a8ddb803edcf8b7e635342befd731dcc))
+
+
+### Bug Fixes
+
+* capitalize firstname ([c378755](https://github.com/digiz3d/kinebilan/commit/c378755e3c7a213f455ce88f9aee67c6c3cfd2e9))
+* uppercase lastname ([558bd7b](https://github.com/digiz3d/kinebilan/commit/558bd7b2c88f2f7e87848cb0b591317adb5cf3a1))
+
 ## [0.4.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.3.0...kinebilan-v0.4.0) (2026-10-18)
 
 
