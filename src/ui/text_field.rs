@@ -1,3 +1,4 @@
+use sdl3::mouse::SystemCursor;
 use sdl3::ttf::Font;
 
 use crate::focus::Field;
@@ -36,6 +37,9 @@ impl<'a> Gui<'a> {
             scroll = self.follow_caret(font, value, inner.w, secret);
         }
 
+        if self.hovered(rect) {
+            self.cursor = SystemCursor::IBeam;
+        }
         let lh = line_height(font);
         let text_y = rect.y + (rect.h - lh) / 2;
         self.fill_bordered(rect, WHITE, if focused { ACCENT } else { INPUT_BORDER });

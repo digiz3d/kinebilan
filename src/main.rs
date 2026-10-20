@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 
 use sdl3::event::Event;
 use sdl3::keyboard::Mod;
-use sdl3::mouse::MouseButton;
+use sdl3::mouse::{Cursor, MouseButton, SystemCursor};
 use sdl3::render::BlendMode;
 
 use app::App;
@@ -45,6 +45,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut focus = None;
     let mut caret = Caret::default();
     let mut redraw_now = false;
+    let arrow = Cursor::from_system(SystemCursor::Arrow)?;
+    let hand = Cursor::from_system(SystemCursor::Hand)?;
+    let ibeam = Cursor::from_system(SystemCursor::IBeam)?;
 
     'running: loop {
         let timeout = if redraw_now { Duration::ZERO } else { IDLE_REDRAW };
@@ -78,12 +81,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let (width, height) = canvas.output_size()?;
         let screen = Rect::new(0, 0, width as i32, height as i32);
-        let (next_focus, changed, mut next_caret) = {
+        let (next_focus, changed, mut next_caret, cursor) = {
             let mut gui = Gui::new(&mut canvas, &textures, &clipboard, input, focus, caret);
             app.draw(&mut gui, &fonts, screen);
             gui.finish();
-            (gui.focus, gui.changed, gui.caret)
+            (gui.focus, gui.changed, gui.caret, gui.cursor)
         };
+        match cursor {
+            SystemCursor::Hand => hand.set(),
+            SystemCursor::IBeam => ibeam.set(),
+            _ => arrow.set(),
+        }
         canvas.present();
         if next_caret.take_blink_reset() {
             started = Instant::now();

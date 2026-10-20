@@ -1,3 +1,4 @@
+use sdl3::mouse::SystemCursor;
 use sdl3::pixels::Color;
 use sdl3::ttf::Font;
 
@@ -44,6 +45,9 @@ impl ButtonStyle {
 impl<'a> Gui<'a> {
     pub fn button(&mut self, rect: Rect, label: &str, font: &Font, style: ButtonStyle) -> bool {
         let hot = self.hovered(rect);
+        if hot {
+            self.cursor = SystemCursor::Hand;
+        }
         let (bg, fg, border) = style.colors(hot);
         self.fill_bordered(rect, bg, border);
         self.text_centered(font, label, rect, fg);

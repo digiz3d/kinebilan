@@ -1,3 +1,5 @@
+use sdl3::mouse::SystemCursor;
+
 use super::App;
 use crate::ui::*;
 
@@ -44,6 +46,9 @@ impl App {
         for (row, &index) in visible.iter().enumerate() {
             let item = Rect::new(list.x, list.y + row as i32 * pitch - self.patients_scroll, list.w, item_h);
             let hot = gui.hovered(item);
+            if hot {
+                gui.cursor = SystemCursor::Hand;
+            }
             gui.fill_bordered(
                 item,
                 if hot { ACCENT_SOFT } else { ITEM_BG },

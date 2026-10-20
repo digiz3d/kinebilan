@@ -1,3 +1,4 @@
+use sdl3::mouse::SystemCursor;
 use sdl3::ttf::Font;
 
 use crate::focus::Field;
@@ -42,6 +43,9 @@ impl<'a> Gui<'a> {
         }
 
         let h = area_height(font, value, w, min_rows);
+        if self.hovered(Rect::new(x, y, w, h)) {
+            self.cursor = SystemCursor::IBeam;
+        }
         self.fill_bordered(Rect::new(x, y, w, h), WHITE, if focused { ACCENT } else { INPUT_BORDER });
 
         if value.is_empty() {

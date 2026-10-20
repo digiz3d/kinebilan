@@ -1,5 +1,6 @@
 use sdl3::clipboard::ClipboardUtil;
 use sdl3::keyboard::Keycode;
+use sdl3::mouse::SystemCursor;
 use sdl3::pixels::Color;
 use sdl3::render::{FRect, TextureCreator, WindowCanvas};
 use sdl3::ttf::Font;
@@ -29,6 +30,7 @@ pub struct Gui<'a> {
     pub focus: Option<Field>,
     pub caret: Caret,
     pub changed: bool,
+    pub cursor: SystemCursor,
     pub(super) focus_by_tab: bool,
     interactive: bool,
     clips: Vec<Rect>,
@@ -68,6 +70,7 @@ impl<'a> Gui<'a> {
             focus,
             caret,
             changed,
+            cursor: SystemCursor::Arrow,
             focus_by_tab,
             interactive: true,
             clips: Vec::new(),
