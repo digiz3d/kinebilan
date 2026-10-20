@@ -45,7 +45,7 @@ impl App {
             action = FormAction::LeaveWithoutSaving;
         }
         if gui.button(save_rect, "Enregistrer", &fonts.button, ButtonStyle::Primary) {
-            action = FormAction::Save;
+            action = FormAction::SaveAndLeave;
         }
         action
     }

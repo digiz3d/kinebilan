@@ -30,10 +30,12 @@ impl App {
         let title = if self.active_patient.last_name.is_empty() {
             "Nouveau patient".to_string()
         } else {
+            let unsaved = if self.has_unsaved_changes() { "*" } else { "" };
             format!(
-                "Fiche patient : {} {}",
+                "Fiche patient : {} {}{}",
                 self.active_patient.last_name.to_uppercase(),
-                self.active_patient.display_first_name()
+                self.active_patient.display_first_name(),
+                unsaved
             )
         };
         let side = 110.max(save_w) + 16;

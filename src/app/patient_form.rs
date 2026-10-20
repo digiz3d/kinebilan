@@ -91,8 +91,14 @@ impl App {
                 gui.focus = None;
             }
             FormAction::Save => {
+                if self.save_active() {
+                    gui.focus = None;
+                }
+            }
+            FormAction::SaveAndLeave => {
                 self.show_leave_modal = false;
                 if self.save_active() {
+                    self.page = Page::Home;
                     gui.focus = None;
                 }
             }

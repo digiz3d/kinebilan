@@ -40,6 +40,7 @@ enum FormAction {
     Back,
     Delete,
     Save,
+    SaveAndLeave,
     OpenSessionModal,
     EditSession(usize),
     DeleteSession(usize),

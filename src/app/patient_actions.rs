@@ -91,7 +91,6 @@ impl App {
         }
         if self.save(&list).is_ok() {
             self.patients = list;
-            self.page = Page::Home;
             true
         } else {
             self.validation_error = Some("Erreur lors de l'enregistrement sur le disque.".into());

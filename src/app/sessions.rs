@@ -20,7 +20,7 @@ impl App {
         let objectives = self.new_session_objectives.trim().to_string();
         let content = self.new_session_content.trim().to_string();
         let date = to_storage_date(self.new_session_date.trim());
-        if let Some(date) = date.filter(|_| !content.is_empty()) {
+        if let Some(date) = date {
             match self.editing_session.and_then(|i| self.active_patient.sessions.get_mut(i)) {
                 Some(session) => {
                     session.date = date;
