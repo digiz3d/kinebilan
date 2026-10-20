@@ -3,7 +3,7 @@ use sdl3::ttf::Font;
 
 use crate::focus::Field;
 
-use super::charset::{format_birth_date, Charset};
+use super::charset::{format_digits, Charset};
 use super::geometry::Rect;
 use super::gui::Gui;
 use super::text::{index_at, line_of, measure, shown, word_span, wrap_spans};
@@ -69,12 +69,17 @@ impl<'a> Gui<'a> {
         changed
     }
 
-    /// Whether the collapsed caret sits right after (`back`) or right before a `/` separator.
+    /// Whether the collapsed caret sits right after (`back`) or right before a separator in a date.
     fn at_separator(&self, value: &str, charset: Charset, back: bool) -> bool {
         let (lo, hi) = self.caret.sel();
-        charset == Charset::BirthDate
+        let is_separator = |c: Option<char>| c.is_some_and(|c| !c.is_ascii_digit());
+        charset.template().is_some()
             && lo == hi
-            && if back { value[..lo].ends_with('/') } else { value[lo..].starts_with('/') }
+            && if back {
+                is_separator(value[..lo].chars().next_back())
+            } else {
+                is_separator(value[lo..].chars().next())
+            }
     }
 
     fn move_row(&mut self, font: &Font, value: &str, wrap_w: i32, down: bool) {
@@ -167,8 +172,8 @@ impl<'a> Gui<'a> {
         }
         let changed = typed || edited;
         if changed {
-            if charset == Charset::BirthDate {
-                let (formatted, cursor) = format_birth_date(value, self.caret.cursor);
+            if let Some(template) = charset.template() {
+                let (formatted, cursor) = format_digits(template, value, self.caret.cursor);
                 *value = formatted;
                 self.caret.select_to(cursor, false);
             }

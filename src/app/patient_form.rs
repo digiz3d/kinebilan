@@ -2,6 +2,7 @@ use super::form_bar::BAR_H;
 use super::form_footer::FOOTER_H;
 use super::{App, FormAction, Page, CARD_PADDING};
 use crate::focus::Field;
+use crate::patient::to_display_date;
 use crate::ui::*;
 
 impl App {
@@ -96,7 +97,7 @@ impl App {
                 }
             }
             FormAction::OpenSessionModal => {
-                self.new_session_date = chrono::Local::now().format("%Y-%m-%d").to_string();
+                self.new_session_date = chrono::Local::now().format("%d/%m/%Y").to_string();
                 self.new_session_notes.clear();
                 self.new_session_objectives.clear();
                 self.new_session_content.clear();
@@ -106,7 +107,7 @@ impl App {
             }
             FormAction::EditSession(idx) => {
                 let session = &self.active_patient.sessions[idx];
-                self.new_session_date = session.date.clone();
+                self.new_session_date = to_display_date(&session.date);
                 self.new_session_notes = session.notes.clone();
                 self.new_session_objectives = session.objectives.clone();
                 self.new_session_content = session.content.clone();

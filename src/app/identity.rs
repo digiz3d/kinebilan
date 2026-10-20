@@ -45,10 +45,10 @@ impl App {
         if gui.text_field(
             Field::BirthDate,
             Rect::new(cols[2], field_y, col_w, field_h),
-            &mut self.active_patient.birth_date,
+            &mut self.birth_date_input,
             "JJ/MM/AAAA",
             &fonts.body,
-            Charset::BirthDate,
+            Charset::Date,
         ) {
             self.validation_error = None;
         }
@@ -63,13 +63,14 @@ impl App {
         if gui.text_field(
             Field::CreationDate,
             Rect::new(cols[4], field_y, col_w, field_h),
-            &mut self.active_patient.creation_date,
-            "JJ/MM/AAAA",
+            &mut self.creation_date_input,
+            "JJ/MM/AAAA HH:MM",
             &fonts.body,
-            Charset::BirthDate,
+            Charset::DateTime,
         ) {
             self.validation_error = None;
         }
+        self.sync_date_inputs();
         field_y + field_h + 20
     }
 }

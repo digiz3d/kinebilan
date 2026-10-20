@@ -1,3 +1,5 @@
+use chrono::{DateTime, NaiveDate, Utc};
+
 use super::App;
 use crate::patient::Patient;
 
@@ -21,13 +23,17 @@ impl App {
     }
 }
 
-fn last_activity_date(patient: &Patient) -> Option<chrono::NaiveDate> {
+/// The latest session day (at midnight) or the creation instant, whichever is later. Creation keeps its time,
+/// so two patients created on the same day are still ordered.
+fn last_activity_date(patient: &Patient) -> Option<DateTime<Utc>> {
     let latest_session = patient
         .sessions
         .iter()
-        .filter_map(|s| chrono::NaiveDate::parse_from_str(&s.date, "%Y-%m-%d").ok())
-        .max();
-    let created = chrono::NaiveDate::parse_from_str(&patient.creation_date, "%d/%m/%Y").ok();
+        .filter_map(|s| NaiveDate::parse_from_str(&s.date, "%Y-%m-%d").ok())
+        .max()
+        .and_then(|date| date.and_hms_opt(0, 0, 0))
+        .map(|midnight| midnight.and_utc());
+    let created = DateTime::parse_from_rfc3339(&patient.creation_date).ok().map(|created| created.with_timezone(&Utc));
     latest_session.into_iter().chain(created).max()
 }
 

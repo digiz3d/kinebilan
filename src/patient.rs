@@ -1,3 +1,4 @@
+use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
@@ -17,9 +18,9 @@ pub struct Patient {
     pub id: String,
     pub last_name: String,
     pub first_name: String,
-    /// Birth date as `dd/mm/yyyy`.
+    /// Birth date as `yyyy-mm-dd`.
     pub birth_date: String,
-    /// Date the patient was created, as `dd/mm/yyyy`. Empty when unknown.
+    /// Date and time the patient was created, in UTC as `yyyy-mm-ddTHH:MM:00Z`. Empty when unknown.
     pub creation_date: String,
     #[serde(default)]
     pub care_type: String,
@@ -51,9 +52,48 @@ impl Patient {
     }
 }
 
-/// Whether `text` is a real date written as `dd/mm/yyyy`.
-pub fn is_valid_date(text: &str) -> bool {
-    text.len() == 10 && chrono::NaiveDate::parse_from_str(text, "%d/%m/%Y").is_ok()
+/// Parses a date written as `dd/mm/yyyy`, the format shown and typed in the app.
+fn parse_display_date(text: &str) -> Option<chrono::NaiveDate> {
+    if text.len() != 10 {
+        return None;
+    }
+    chrono::NaiveDate::parse_from_str(text, "%d/%m/%Y").ok()
+}
+
+/// Converts a `dd/mm/yyyy` date to the stored `yyyy-mm-dd` form. `None` when it is not a real date.
+pub fn to_storage_date(display: &str) -> Option<String> {
+    parse_display_date(display).map(|date| date.format("%Y-%m-%d").to_string())
+}
+
+/// Converts a stored `yyyy-mm-dd` date to `dd/mm/yyyy` for display. Text that is not a date is returned unchanged.
+pub fn to_display_date(stored: &str) -> String {
+    match chrono::NaiveDate::parse_from_str(stored, "%Y-%m-%d") {
+        Ok(date) => date.format("%d/%m/%Y").to_string(),
+        Err(_) => stored.to_string(),
+    }
+}
+
+/// Formats a UTC instant as it is stored: `yyyy-mm-ddTHH:MM:00Z`. Seconds are dropped.
+pub fn format_stored_datetime(instant: DateTime<Utc>) -> String {
+    instant.format("%Y-%m-%dT%H:%M:00Z").to_string()
+}
+
+/// Converts a local `dd/mm/yyyy HH:MM` to the stored UTC form. `None` when it is not a real date and time.
+pub fn to_storage_datetime(display: &str) -> Option<String> {
+    if display.len() != 16 {
+        return None;
+    }
+    let naive = NaiveDateTime::parse_from_str(display, "%d/%m/%Y %H:%M").ok()?;
+    let local = Local.from_local_datetime(&naive).earliest()?;
+    Some(format_stored_datetime(local.with_timezone(&Utc)))
+}
+
+/// Converts a stored UTC date and time to local `dd/mm/yyyy HH:MM` for display. Text that is not a date and time is returned unchanged.
+pub fn to_display_datetime(stored: &str) -> String {
+    match DateTime::parse_from_rfc3339(stored) {
+        Ok(instant) => instant.with_timezone(&Local).format("%d/%m/%Y %H:%M").to_string(),
+        Err(_) => stored.to_string(),
+    }
 }
 
 /// Uppercases the first letter of `s`, leaving the rest untouched.
@@ -97,13 +137,24 @@ mod tests {
     }
 
     #[test]
-    fn test_date_validation() {
-        assert!(is_valid_date("01/01/1990"));
-        assert!(is_valid_date("29/02/2024"));
-        assert!(!is_valid_date("29/02/2023"));
-        assert!(!is_valid_date("01/0/1990"));
-        assert!(!is_valid_date("1990-01-01"));
-        assert!(!is_valid_date(""));
+    fn test_date_conversion() {
+        assert_eq!(to_storage_date("12/04/1985").as_deref(), Some("1985-04-12"));
+        assert_eq!(to_storage_date("29/02/2023"), None);
+        assert_eq!(to_storage_date("1985-04-12"), None);
+        assert_eq!(to_display_date("1985-04-12"), "12/04/1985");
+        assert_eq!(to_display_date(""), "");
+        assert_eq!(to_display_date("12/04/1985"), "12/04/1985");
+    }
+
+    #[test]
+    fn test_datetime_round_trip() {
+        let stored = to_storage_datetime("20/10/2026 16:15").unwrap();
+        assert!(stored.ends_with("Z") && stored.len() == 20);
+        assert_eq!(to_display_datetime(&stored), "20/10/2026 16:15");
+        assert_eq!(to_storage_datetime("20/10/2026"), None);
+        assert_eq!(to_storage_datetime("31/02/2026 10:00"), None);
+        assert_eq!(to_storage_datetime("20/10/2026 25:00"), None);
+        assert_eq!(to_display_datetime(""), "");
     }
 
     #[test]

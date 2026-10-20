@@ -1,6 +1,7 @@
 use sdl3::mouse::SystemCursor;
 
 use super::App;
+use crate::patient::to_display_date;
 use crate::ui::*;
 
 impl App {
@@ -71,7 +72,7 @@ impl App {
                 gui.fill(tag, SECONDARY_BG);
                 gui.text_centered(&fonts.badge, &p.care_type, tag, LABEL);
             }
-            let dob = format!("Né(e) le: {}", p.birth_date);
+            let dob = format!("Né(e) le: {}", to_display_date(&p.birth_date));
             gui.text(&fonts.small, &dob, item.x + 18, item.y + 42, MUTED);
 
             let badge_label = format!("{} séance(s)", p.sessions.len());

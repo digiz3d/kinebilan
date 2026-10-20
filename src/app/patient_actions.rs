@@ -1,11 +1,11 @@
 use super::{App, Page};
-use crate::patient::{is_valid_date, Patient};
+use crate::patient::{format_stored_datetime, to_display_date, to_display_datetime, to_storage_date, to_storage_datetime, Patient};
 
 impl App {
     pub(super) fn start_new_patient(&mut self) {
         self.active_patient = Patient {
             id: uuid::Uuid::new_v4().to_string(),
-            creation_date: chrono::Local::now().format("%d/%m/%Y").to_string(),
+            creation_date: format_stored_datetime(chrono::Utc::now()),
             ..Default::default()
         };
         self.open_form();
@@ -16,7 +16,10 @@ impl App {
         self.open_form();
     }
 
+    /// Copies the stored dates of the active patient into the `dd/mm/yyyy` inputs.
     fn open_form(&mut self) {
+        self.birth_date_input = to_display_date(&self.active_patient.birth_date);
+        self.creation_date_input = to_display_datetime(&self.active_patient.creation_date);
         self.validation_error = None;
         self.show_session_modal = false;
         self.show_leave_modal = false;
@@ -50,7 +53,17 @@ impl App {
         current != saved
     }
 
+    /// Stores the date inputs in the active patient. Input that is not a real date yet is kept as typed,
+    /// so the patient still counts as changed and saving is refused until it is fixed.
+    pub(super) fn sync_date_inputs(&mut self) {
+        self.active_patient.birth_date =
+            to_storage_date(&self.birth_date_input).unwrap_or_else(|| self.birth_date_input.clone());
+        self.active_patient.creation_date =
+            to_storage_datetime(&self.creation_date_input).unwrap_or_else(|| self.creation_date_input.clone());
+    }
+
     pub(super) fn save_active(&mut self) -> bool {
+        self.sync_date_inputs();
         let mut curr = self.active_patient.clone();
         curr.sort_sessions();
         curr.normalize();
@@ -62,12 +75,12 @@ impl App {
                 Some("Le nom, prénom et la date de naissance sont obligatoires.".into());
             return false;
         }
-        if !is_valid_date(&curr.birth_date) {
+        if to_storage_date(&self.birth_date_input).is_none() {
             self.validation_error = Some("La date de naissance doit être au format JJ/MM/AAAA.".into());
             return false;
         }
-        if !curr.creation_date.trim().is_empty() && !is_valid_date(&curr.creation_date) {
-            self.validation_error = Some("La date de création doit être au format JJ/MM/AAAA.".into());
+        if !self.creation_date_input.trim().is_empty() && to_storage_datetime(&self.creation_date_input).is_none() {
+            self.validation_error = Some("La date de création doit être au format JJ/MM/AAAA HH:MM.".into());
             return false;
         }
         let mut list = self.patients.clone();

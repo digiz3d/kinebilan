@@ -1,5 +1,5 @@
 use super::{App, FormAction, BOX_GAP, BOX_PADDING};
-use crate::patient::Session;
+use crate::patient::{to_display_date, to_storage_date, Session};
 use crate::ui::*;
 
 struct SessionRow {
@@ -14,17 +14,13 @@ const EDIT_BUTTON_W: i32 = 96;
 const DELETE_BUTTON_W: i32 = 120;
 const ROW_BUTTON_H: i32 = 30;
 
-pub(super) fn is_valid_session_date(date: &str) -> bool {
-    chrono::NaiveDate::parse_from_str(date.trim(), "%Y-%m-%d").is_ok()
-}
-
 impl App {
     pub(super) fn save_session(&mut self) {
         let notes = self.new_session_notes.trim().to_string();
         let objectives = self.new_session_objectives.trim().to_string();
         let content = self.new_session_content.trim().to_string();
-        let date = self.new_session_date.trim().to_string();
-        if !content.is_empty() && is_valid_session_date(&date) {
+        let date = to_storage_date(self.new_session_date.trim());
+        if let Some(date) = date.filter(|_| !content.is_empty()) {
             match self.editing_session.and_then(|i| self.active_patient.sessions.get_mut(i)) {
                 Some(session) => {
                     session.date = date;
@@ -71,7 +67,8 @@ impl App {
             .iter()
             .enumerate()
             .map(|(idx, s)| {
-                let (date_w, _) = measure(&fonts.label, &s.date);
+                let date = to_display_date(&s.date);
+                let (date_w, _) = measure(&fonts.label, &date);
                 let text_w = inner_w - 2 * 14 - date_w - 12 - DELETE_BUTTON_W - 8 - EDIT_BUTTON_W - 12;
                 let or_dash = |v: &str| if v.trim().is_empty() { "—".to_string() } else { v.to_string() };
                 let mut lines = Vec::new();
@@ -85,7 +82,7 @@ impl App {
                 }
                 let text_h = lines.len() as i32 * line_height(&fonts.body);
                 let height = text_h.max(ROW_BUTTON_H) + 2 * 10;
-                SessionRow { idx, date: s.date.clone(), date_w, lines, height }
+                SessionRow { idx, date, date_w, lines, height }
             })
             .collect();
         let row_gap = 8;

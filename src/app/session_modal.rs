@@ -1,6 +1,6 @@
-use super::sessions::is_valid_session_date;
 use super::{App, FormAction};
 use crate::focus::Field;
+use crate::patient::to_storage_date;
 use crate::ui::*;
 
 impl App {
@@ -53,12 +53,12 @@ impl App {
         y += title_h + 16;
         gui.text(&fonts.label, "Date de la séance", x, y, LABEL);
         let date_y = y + label_h + 6;
-        let date_valid = is_valid_session_date(&self.new_session_date);
+        let date_valid = to_storage_date(self.new_session_date.trim()).is_some();
         gui.text_field(
             Field::SessionDate,
             Rect::new(x, date_y, 200, 40),
             &mut self.new_session_date,
-            "AAAA-MM-JJ",
+            "JJ/MM/AAAA",
             &fonts.body,
             Charset::Date,
         );
