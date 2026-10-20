@@ -71,14 +71,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Event::MouseButtonUp { mouse_btn: MouseButton::Left, .. } => mouse_down = false,
                 Event::MouseWheel { y, .. } => input.scroll_px -= y * WHEEL_STEP_PX,
                 Event::TextInput { text, .. } => input.text.push_str(&text),
-                Event::KeyDown { keycode: Some(key), keymod, .. } => {
-                    input.shift = keymod.intersects(Mod::LSHIFTMOD | Mod::RSHIFTMOD);
-                    input.ctrl = keymod.intersects(Mod::LCTRLMOD | Mod::RCTRLMOD);
-                    input.keys.push(key);
-                }
+                Event::KeyDown { keycode: Some(key), .. } => input.keys.push(key),
                 _ => {}
             }
         }
+        let mods = sdl.keyboard().mod_state();
+        input.shift = mods.intersects(Mod::LSHIFTMOD | Mod::RSHIFTMOD);
+        input.ctrl = mods.intersects(Mod::LCTRLMOD | Mod::RCTRLMOD);
+        input.alt = mods.intersects(Mod::LALTMOD | Mod::RALTMOD);
+        input.gui = mods.intersects(Mod::LGUIMOD | Mod::RGUIMOD);
         input.mouse = mouse;
         input.mouse_down = mouse_down;
         input.caret_on = (started.elapsed().as_millis() / 500).is_multiple_of(2);

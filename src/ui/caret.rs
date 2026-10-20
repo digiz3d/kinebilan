@@ -54,9 +54,19 @@ impl Caret {
     }
 
     pub(super) fn nav(&mut self, value: &str, forward: bool, extend: bool) {
+        self.step(value, forward, extend, false);
+    }
+
+    pub(super) fn nav_word(&mut self, value: &str, forward: bool, extend: bool) {
+        self.step(value, forward, extend, true);
+    }
+
+    fn step(&mut self, value: &str, forward: bool, extend: bool, word: bool) {
         let (lo, hi) = self.sel();
         let to = if !extend && lo != hi {
             if forward { hi } else { lo }
+        } else if word {
+            word_step(value, self.cursor, forward)
         } else if forward {
             self.cursor + value[self.cursor..].chars().next().map_or(0, char::len_utf8)
         } else {
@@ -138,6 +148,18 @@ impl Caret {
     }
 }
 
+fn word_step(value: &str, i: usize, forward: bool) -> usize {
+    let is_word = |c: char| c.is_alphanumeric() || c == '_';
+    if forward {
+        let rest = &value[i..];
+        let start = rest.find(is_word).unwrap_or(rest.len());
+        let word = &rest[start..];
+        i + start + word.find(|c: char| !is_word(c)).unwrap_or(word.len())
+    } else {
+        value[..i].trim_end_matches(|c: char| !is_word(c)).trim_end_matches(is_word).len()
+    }
+}
+
 fn floor_boundary(value: &str, mut i: usize) -> usize {
     i = i.min(value.len());
     while !value.is_char_boundary(i) {
@@ -162,6 +184,32 @@ mod tests {
         let mut caret = Caret::default();
         caret.claim(Field::LastName, "Dupont", false);
         assert_eq!(caret.sel(), (6, 6));
+    }
+
+    #[test]
+    fn test_word_nav_moves_by_word() {
+        let mut caret = Caret::default();
+        let value = "foo, bar_1 baz";
+        caret.claim(Field::LastName, value, false);
+        caret.select_to(0, false);
+        caret.nav_word(value, true, false);
+        assert_eq!(caret.sel(), (3, 3));
+        caret.nav_word(value, true, false);
+        assert_eq!(caret.sel(), (10, 10));
+        caret.nav_word(value, false, false);
+        assert_eq!(caret.sel(), (5, 5));
+    }
+
+    #[test]
+    fn test_word_nav_with_extend_selects_words() {
+        let mut caret = Caret::default();
+        let value = "foo bar";
+        caret.claim(Field::LastName, value, false);
+        caret.select_to(7, false);
+        caret.nav_word(value, false, true);
+        assert_eq!(caret.sel(), (4, 7));
+        caret.nav_word(value, false, true);
+        assert_eq!(caret.sel(), (0, 7));
     }
 
     #[test]

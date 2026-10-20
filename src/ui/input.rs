@@ -11,5 +11,7 @@ pub struct Input {
     pub keys: Vec<Keycode>,
     pub shift: bool,
     pub ctrl: bool,
+    pub alt: bool,
+    pub gui: bool,
     pub caret_on: bool,
 }

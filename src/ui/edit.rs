@@ -100,11 +100,14 @@ impl<'a> Gui<'a> {
     pub(super) fn apply_input(&mut self, font: &Font, value: &mut String, wrap_w: Option<i32>, charset: Charset) -> bool {
         let multiline = wrap_w.is_some();
         let secret = charset == Charset::Secret;
-        let (shift, ctrl) = (self.input.shift, self.input.ctrl);
+        let mac = cfg!(target_os = "macos");
+        let (shift, ctrl, alt, gui) = (self.input.shift, self.input.ctrl, self.input.alt, self.input.gui);
+        let shortcut = if mac { gui } else { ctrl };
+        let word_mod = if mac { alt } else { ctrl };
         let text = std::mem::take(&mut self.input.text);
         let keys = std::mem::take(&mut self.input.keys);
-        let redo = ctrl && (keys.contains(&Keycode::Y) || (shift && keys.contains(&Keycode::Z)));
-        let undo = ctrl && !shift && keys.contains(&Keycode::Z);
+        let redo = shortcut && (keys.contains(&Keycode::Y) || (shift && keys.contains(&Keycode::Z)));
+        let undo = shortcut && !shift && keys.contains(&Keycode::Z);
         if undo || redo {
             let moved = if redo { self.caret.redo(value) } else { self.caret.undo(value) };
             self.changed |= moved;
@@ -132,7 +135,14 @@ impl<'a> Gui<'a> {
                 }
                 Keycode::Return | Keycode::KpEnter => self.type_text(value, "\n", multiline, charset),
                 Keycode::Left | Keycode::Right => {
-                    self.caret.nav(value, key == Keycode::Right, shift);
+                    let forward = key == Keycode::Right;
+                    if mac && gui {
+                        self.caret.select_to(if forward { value.len() } else { 0 }, shift);
+                    } else if word_mod {
+                        self.caret.nav_word(value, forward, shift);
+                    } else {
+                        self.caret.nav(value, forward, shift);
+                    }
                     false
                 }
                 Keycode::Home | Keycode::End => {
@@ -146,24 +156,24 @@ impl<'a> Gui<'a> {
                     }
                     false
                 }
-                Keycode::A if ctrl => {
+                Keycode::A if shortcut => {
                     self.caret.select_to(0, false);
                     self.caret.select_to(value.len(), true);
                     false
                 }
-                Keycode::C if ctrl => {
+                Keycode::C if shortcut => {
                     if !secret {
                         self.copy(value);
                     }
                     false
                 }
-                Keycode::X if ctrl => {
+                Keycode::X if shortcut => {
                     if !secret {
                         self.copy(value);
                     }
                     self.caret.delete_sel(value)
                 }
-                Keycode::V if ctrl => match self.clipboard.clipboard_text() {
+                Keycode::V if shortcut => match self.clipboard.clipboard_text() {
                     Ok(pasted) => self.type_text(value, &pasted.replace("\r\n", "\n"), multiline, charset),
                     Err(_) => false,
                 },
