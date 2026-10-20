@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.6.0...kinebilan-v0.7.0) (2026-10-20)
+
+
+### Features
+
+* add time to creation date ([6518d93](https://github.com/digiz3d/kinebilan/commit/6518d937c01c02bb6dd0e072aa127956f090dab0))
+* change cursor depending on items ([ba63822](https://github.com/digiz3d/kinebilan/commit/ba6382281e944461356b7d7dca7a8f3b909e0268))
+* save status indicator ([f90a314](https://github.com/digiz3d/kinebilan/commit/f90a314ee52ac652089d6de99a057604f2a543cc))
+
+
+### Bug Fixes
+
+* client list ordered by last activity ([f7217fd](https://github.com/digiz3d/kinebilan/commit/f7217fd71ee401023909871482a20fd14d3b0d13))
+
 ## [0.6.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.5.0...kinebilan-v0.6.0) (2026-10-19)
 
 
