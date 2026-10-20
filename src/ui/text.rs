@@ -1,16 +1,28 @@
 use std::borrow::Cow;
+use std::sync::OnceLock;
 
 use sdl3::ttf::Font;
 
 use super::theme::{PAD_X, PAD_Y};
 
+static DISPLAY_SCALE: OnceLock<f32> = OnceLock::new();
+
+pub fn set_display_scale(scale: f32) {
+    let _ = DISPLAY_SCALE.set(scale);
+}
+
+pub(super) fn display_scale() -> f32 {
+    DISPLAY_SCALE.get().copied().unwrap_or(1.0)
+}
+
 pub fn line_height(font: &Font) -> i32 {
-    font.recommended_line_spacing()
+    (font.recommended_line_spacing() as f32 / display_scale()).round() as i32
 }
 
 pub fn measure(font: &Font, s: &str) -> (i32, i32) {
+    let scale = display_scale();
     font.size_of(s)
-        .map(|(w, h)| (w as i32, h as i32))
+        .map(|(w, h)| ((w as f32 / scale).round() as i32, (h as f32 / scale).round() as i32))
         .unwrap_or((0, line_height(font)))
 }
 

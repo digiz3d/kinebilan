@@ -39,21 +39,22 @@ pub struct Fonts {
 }
 
 impl Fonts {
-    pub fn load(ttf: &Sdl3TtfContext) -> Result<Self, String> {
+    /// Fonts are rasterized at `scale` times their logical size so they stay sharp on HiDPI displays.
+    pub fn load(ttf: &Sdl3TtfContext, scale: f32) -> Result<Self, String> {
         let mut emoji = Vec::new();
         Ok(Self {
-            title: load_styled(ttf, BOLD_FONTS, 26.0, &mut emoji)?,
-            heading: load_styled(ttf, BOLD_FONTS, 20.0, &mut emoji)?,
-            section: load_styled(ttf, BOLD_FONTS, 16.0, &mut emoji)?,
-            modal_title: load_styled(ttf, BOLD_FONTS, 17.0, &mut emoji)?,
-            label: load_styled(ttf, BOLD_FONTS, 13.0, &mut emoji)?,
-            body: load_styled(ttf, REGULAR_FONTS, 14.0, &mut emoji)?,
-            body_bold: load_styled(ttf, BOLD_FONTS, 14.0, &mut emoji)?,
-            body_large: load_styled(ttf, REGULAR_FONTS, 15.0, &mut emoji)?,
-            small: load_styled(ttf, REGULAR_FONTS, 13.0, &mut emoji)?,
-            badge: load_styled(ttf, REGULAR_FONTS, 12.0, &mut emoji)?,
-            button: load_styled(ttf, REGULAR_FONTS, 14.0, &mut emoji)?,
-            button_large: load_styled(ttf, BOLD_FONTS, 15.0, &mut emoji)?,
+            title: load_styled(ttf, BOLD_FONTS, 26.0 * scale, &mut emoji)?,
+            heading: load_styled(ttf, BOLD_FONTS, 20.0 * scale, &mut emoji)?,
+            section: load_styled(ttf, BOLD_FONTS, 16.0 * scale, &mut emoji)?,
+            modal_title: load_styled(ttf, BOLD_FONTS, 17.0 * scale, &mut emoji)?,
+            label: load_styled(ttf, BOLD_FONTS, 13.0 * scale, &mut emoji)?,
+            body: load_styled(ttf, REGULAR_FONTS, 14.0 * scale, &mut emoji)?,
+            body_bold: load_styled(ttf, BOLD_FONTS, 14.0 * scale, &mut emoji)?,
+            body_large: load_styled(ttf, REGULAR_FONTS, 15.0 * scale, &mut emoji)?,
+            small: load_styled(ttf, REGULAR_FONTS, 13.0 * scale, &mut emoji)?,
+            badge: load_styled(ttf, REGULAR_FONTS, 12.0 * scale, &mut emoji)?,
+            button: load_styled(ttf, REGULAR_FONTS, 14.0 * scale, &mut emoji)?,
+            button_large: load_styled(ttf, BOLD_FONTS, 15.0 * scale, &mut emoji)?,
             _emoji: emoji,
         })
     }

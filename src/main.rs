@@ -14,7 +14,7 @@ use sdl3::mouse::{Cursor, MouseButton, SystemCursor};
 use sdl3::render::BlendMode;
 
 use app::App;
-use ui::{Caret, Fonts, Gui, Input, Rect};
+use ui::{Caret, Fonts, Gui, Input, Rect, set_display_scale};
 
 const WHEEL_STEP_PX: f32 = 40.0;
 const IDLE_REDRAW: Duration = Duration::from_millis(250);
@@ -28,14 +28,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .window("KinéBilan", 980, 840)
         .position_centered()
         .resizable()
+        .high_pixel_density()
         .build()?;
     video.text_input().start(&window);
     let clipboard = video.clipboard();
 
+    let scale = window.display_scale();
+    set_display_scale(scale);
     let mut canvas = window.into_canvas();
+    canvas.set_scale(scale, scale)?;
     canvas.set_blend_mode(BlendMode::Blend);
     let textures = canvas.texture_creator();
-    let fonts = Fonts::load(&ttf)?;
+    let fonts = Fonts::load(&ttf, scale)?;
     let mut event_pump = sdl.event_pump()?;
 
     let mut app = App::new();
@@ -80,7 +84,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         input.caret_on = (started.elapsed().as_millis() / 500).is_multiple_of(2);
 
         let (width, height) = canvas.output_size()?;
-        let screen = Rect::new(0, 0, width as i32, height as i32);
+        let screen = Rect::new(0, 0, (width as f32 / scale) as i32, (height as f32 / scale) as i32);
         let (next_focus, changed, mut next_caret, cursor) = {
             let mut gui = Gui::new(&mut canvas, &textures, &clipboard, input, focus, caret);
             app.draw(&mut gui, &fonts, screen);

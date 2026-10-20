@@ -18,5 +18,5 @@ pub use fonts::Fonts;
 pub use geometry::Rect;
 pub use gui::{clamp_scroll, Gui};
 pub use input::Input;
-pub use text::{area_height, line_height, measure, wrap};
+pub use text::{area_height, line_height, measure, set_display_scale, wrap};
 pub use theme::*;

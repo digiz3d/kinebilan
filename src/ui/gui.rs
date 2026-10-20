@@ -11,7 +11,7 @@ use crate::focus::Field;
 use super::caret::Caret;
 use super::geometry::Rect;
 use super::input::Input;
-use super::text::measure;
+use super::text::{display_scale, measure};
 use super::theme::INPUT_BORDER;
 
 fn sdl_rect(r: Rect) -> sdl3::rect::Rect {
@@ -172,7 +172,8 @@ impl<'a> Gui<'a> {
         let Ok(texture) = self.textures.create_texture_from_surface(&surface) else {
             return;
         };
-        let dst = FRect::new(x as f32, y as f32, surface.width() as f32, surface.height() as f32);
+        let scale = display_scale();
+        let dst = FRect::new(x as f32, y as f32, surface.width() as f32 / scale, surface.height() as f32 / scale);
         let _ = self.canvas.copy(&texture, None::<FRect>, dst);
     }
 
