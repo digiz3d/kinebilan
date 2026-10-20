@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.7.0...kinebilan-v0.8.0) (2026-10-20)
+
+
+### Features
+
+* keyboard caret control ([532074a](https://github.com/digiz3d/kinebilan/commit/532074aa9fb43df33786b17540b3a677dc700047))
+* support high dpi screens ([42788d3](https://github.com/digiz3d/kinebilan/commit/42788d3e7e32d976474136b705fe9ea86e60ea29))
+
 ## [0.7.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.6.0...kinebilan-v0.7.0) (2026-10-20)
 
 
