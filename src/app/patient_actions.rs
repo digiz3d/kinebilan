@@ -85,12 +85,13 @@ impl App {
         }
         let mut list = self.patients.clone();
         if let Some(idx) = list.iter().position(|p| p.id == curr.id) {
-            list[idx] = curr;
+            list[idx] = curr.clone();
         } else {
-            list.push(curr);
+            list.push(curr.clone());
         }
         if self.save(&list).is_ok() {
             self.patients = list;
+            self.active_patient = curr;
             true
         } else {
             self.validation_error = Some("Erreur lors de l'enregistrement sur le disque.".into());
