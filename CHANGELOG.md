@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.8.0...kinebilan-v0.8.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* properly save new patient ([58c36e7](https://github.com/digiz3d/kinebilan/commit/58c36e7a5261e72749c4e66879823e8bf577fdce))
+
 ## [0.8.0](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.7.0...kinebilan-v0.8.0) (2026-10-20)
 
 
