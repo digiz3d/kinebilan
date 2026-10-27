@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.8.1...kinebilan-v0.8.2) (2026-10-27)
+
+
+### Bug Fixes
+
+* display app version ([#17](https://github.com/digiz3d/kinebilan/issues/17)) ([c3a4015](https://github.com/digiz3d/kinebilan/commit/c3a4015c851682cb4dbd4024f313dc792140b1f6))
+
 ## [0.8.1](https://github.com/digiz3d/kinebilan/compare/kinebilan-v0.8.0...kinebilan-v0.8.1) (2026-10-21)
 
 
