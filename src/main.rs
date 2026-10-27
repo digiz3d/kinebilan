@@ -87,7 +87,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         input.caret_on = (started.elapsed().as_millis() / 500).is_multiple_of(2);
 
         if let Ok(version) = updates.try_recv() {
-            app.set_installed_update(version);
+            let title = format!("KinéBilan {} — MAJ {version} prête", env!("CARGO_PKG_VERSION"));
+            canvas.window_mut().set_title(&title)?;
         }
 
         let (width, height) = canvas.output_size()?;

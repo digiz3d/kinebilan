@@ -6,7 +6,6 @@ mod identity;
 mod leave_modal;
 mod load_error;
 mod patient_actions;
-mod update_notice;
 mod patient_form;
 mod patient_list;
 mod search;
@@ -54,7 +53,6 @@ enum FormAction {
 pub struct App {
     patients: Vec<Patient>,
     load_error: Option<String>,
-    installed_update: Option<String>,
     access: Access,
     vault: Option<Vault>,
     password: String,
@@ -91,7 +89,6 @@ impl App {
         Self {
             patients: Vec::new(),
             load_error,
-            installed_update: None,
             access,
             vault: None,
             password: String::new(),
@@ -123,10 +120,6 @@ impl App {
         self.quit_requested
     }
 
-    pub fn set_installed_update(&mut self, version: String) {
-        self.installed_update = Some(version);
-    }
-
     pub fn draw(&mut self, gui: &mut Gui, fonts: &Fonts, screen: Rect) {
         gui.fill(screen, BG);
         let card = Rect::new(0, 0, screen.w, screen.h);
@@ -134,10 +127,6 @@ impl App {
 
         if self.load_error.is_some() {
             self.draw_load_error(gui, fonts, screen);
-            return;
-        }
-        if self.installed_update.is_some() {
-            self.draw_update_notice(gui, fonts, screen);
             return;
         }
         if self.access != Access::Ready {
