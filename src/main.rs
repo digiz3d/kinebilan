@@ -25,7 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ttf = sdl3::ttf::init()?;
 
     let window = video
-        .window("KinéBilan", 980, 840)
+        .window(concat!("KinéBilan ", env!("CARGO_PKG_VERSION")), 980, 840)
         .position_centered()
         .resizable()
         .high_pixel_density()
