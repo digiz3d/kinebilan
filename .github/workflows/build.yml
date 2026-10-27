@@ -122,10 +122,15 @@ jobs:
           hdiutil create -volname "${APP_DISPLAY_NAME}" -srcfolder "$STAGING" \
             -ov -format UDZO "${APP_NAME}-macos-universal.dmg"
 
+      - name: Create update archive
+        run: tar -czf "${APP_NAME}-macos-universal.tar.gz" -C dist "${APP_NAME}.app"
+
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ env.APP_NAME }}-macos-universal
-          path: ${{ env.APP_NAME }}-macos-universal.dmg
+          path: |
+            ${{ env.APP_NAME }}-macos-universal.dmg
+            ${{ env.APP_NAME }}-macos-universal.tar.gz
           if-no-files-found: error
 
       - name: Upload to release
@@ -133,4 +138,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ inputs.tag_name }}
-        run: gh release upload "$TAG_NAME" "${APP_NAME}-macos-universal.dmg" --clobber
+        run: |
+          gh release upload "$TAG_NAME" "${APP_NAME}-macos-universal.dmg" "${APP_NAME}-macos-universal.tar.gz" --clobber
