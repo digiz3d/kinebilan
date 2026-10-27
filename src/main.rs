@@ -5,6 +5,7 @@ mod focus;
 mod patient;
 mod storage;
 mod ui;
+mod updater;
 
 use std::time::{Duration, Instant};
 
@@ -43,6 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut event_pump = sdl.event_pump()?;
 
     let mut app = App::new();
+    let updates = updater::spawn_check();
     let mut started = Instant::now();
     let mut mouse = (0, 0);
     let mut mouse_down = false;
@@ -83,6 +85,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         input.mouse = mouse;
         input.mouse_down = mouse_down;
         input.caret_on = (started.elapsed().as_millis() / 500).is_multiple_of(2);
+
+        if let Ok(version) = updates.try_recv() {
+            app.set_installed_update(version);
+        }
 
         let (width, height) = canvas.output_size()?;
         let screen = Rect::new(0, 0, (width as f32 / scale) as i32, (height as f32 / scale) as i32);

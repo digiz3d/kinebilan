@@ -11,6 +11,7 @@ A small desktop app for managing physiotherapy patients and their treatment sess
 - Create, edit and delete patient records
 - Track sessions per patient (date, objectives, content, notes)
 - Search patients
+- Automatic updates from GitHub releases (checked at startup, applied on restart)
 
 ## Build & run
 
