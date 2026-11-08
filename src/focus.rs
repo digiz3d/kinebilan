@@ -50,6 +50,12 @@ impl Field {
         }
     }
 
+    #[allow(dead_code)]
+    pub fn tab_order_index(self) -> Option<usize> {
+        self.tab_order().iter().position(|&field| field == self)
+    }
+
+    #[allow(dead_code)]
     pub fn tab_step(self, forward: bool) -> Field {
         let order = self.tab_order();
         let len = order.len();
@@ -57,6 +63,52 @@ impl Field {
             Some(i) if forward => order[(i + 1) % len],
             Some(i) => order[(i + len - 1) % len],
             None => self,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Field;
+
+    #[test]
+    fn form_orders_are_visual_and_wrap_in_both_directions() {
+        for (order, first, last) in [
+            (
+                &[
+                    Field::LastName,
+                    Field::FirstName,
+                    Field::BirthDate,
+                    Field::CareType,
+                    Field::CreationDate,
+                    Field::Antecedents,
+                    Field::Symptoms,
+                    Field::TreatmentObjective,
+                ][..],
+                Field::LastName,
+                Field::TreatmentObjective,
+            ),
+            (
+                &[
+                    Field::SessionDate,
+                    Field::SessionNotes,
+                    Field::SessionObjectives,
+                    Field::SessionContent,
+                ][..],
+                Field::SessionDate,
+                Field::SessionContent,
+            ),
+            (
+                &[Field::Password, Field::PasswordConfirm][..],
+                Field::Password,
+                Field::PasswordConfirm,
+            ),
+        ] {
+            for (index, field) in order.iter().enumerate() {
+                assert_eq!(field.tab_order_index(), Some(index));
+            }
+            assert_eq!(first.tab_step(false), last);
+            assert_eq!(last.tab_step(true), first);
         }
     }
 }

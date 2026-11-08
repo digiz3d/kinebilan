@@ -2,17 +2,21 @@
 name = "kinebilan"
 version = "0.8.2"
 edition = "2024"
+default-run = "kinebilan"
 
 [build-dependencies]
 winresource = "0.1"
 
 [dependencies]
+gpui = { package = "gpui-ce", version = "0.2" }
+gpui_platform = { package = "gpui_ce_platform", version = "0.1", features = ["font-kit"] }
 sdl3 = { version = "0.20", features = ["build-from-source-static", "ttf"] }
 sdl3-sys = { version = "0.7", features = ["no-sdl-audio", "no-sdl-joystick", "no-sdl-haptic", "no-sdl-hidapi", "no-sdl-camera", "no-sdl-gpu", "no-sdl-sensor", "no-sdl-power", "no-sdl-dialog", "no-sdl-tray"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 chrono = "0.4"
 uuid = { version = "1", features = ["v4"] }
+unicode-segmentation = "1"
 argon2 = "0.6"
 chacha20poly1305 = { version = "0.11", features = ["rand_core"] }
 base64 = "0.23"
