@@ -19,3 +19,7 @@ Tab and Shift+Tab must always move focus between the text inputs of the same for
 - Each form has its own tab order constant in `src/focus.rs` (`FORM_TAB_ORDER`, `SESSION_TAB_ORDER`, `ACCESS_TAB_ORDER`), mapped in `Field::tab_order`.
 - Every new text input must be added to the tab order of its form. A new form gets its own constant and an arm in `Field::tab_order`.
 - Do not handle Tab inside individual widgets. `Gui::new` already does it.
+
+# Comments
+
+Keep comments only when they explain a non-obvious reason, constraint, or safety requirement. Keep them short and accurate. Remove comments that restate the code, tutorial-style explanations, and decorative section banners.
