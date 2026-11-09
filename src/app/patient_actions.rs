@@ -18,6 +18,7 @@ impl App {
 
     /// Copies the stored dates of the active patient into the `dd/mm/yyyy` inputs.
     fn open_form(&mut self) {
+        self.initial_patient = self.active_patient.clone();
         self.birth_date_input = to_display_date(&self.active_patient.birth_date);
         self.creation_date_input = to_display_datetime(&self.active_patient.creation_date);
         self.validation_error = None;
@@ -49,7 +50,7 @@ impl App {
             .iter()
             .find(|p| p.id == current.id)
             .cloned()
-            .unwrap_or_else(|| Patient { id: current.id.clone(), ..Default::default() });
+            .unwrap_or_else(|| self.initial_patient.clone());
         current != saved
     }
 
@@ -97,5 +98,53 @@ impl App {
             self.validation_error = Some("Erreur lors de l'enregistrement sur le disque.".into());
             false
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::patient::Session;
+
+    #[test]
+    fn untouched_new_patient_has_no_unsaved_changes() {
+        let mut app = App::new();
+        app.start_new_patient();
+        app.sync_date_inputs();
+        assert!(!app.active_patient.creation_date.is_empty());
+        assert!(!app.has_unsaved_changes());
+
+        app.active_patient.first_name = "Jean".into();
+        assert!(app.has_unsaved_changes());
+        app.active_patient.first_name.clear();
+        assert!(!app.has_unsaved_changes());
+
+        app.creation_date_input.clear();
+        app.sync_date_inputs();
+        assert!(app.has_unsaved_changes());
+        app.creation_date_input = to_display_datetime(&app.initial_patient.creation_date);
+        app.sync_date_inputs();
+        assert!(!app.has_unsaved_changes());
+
+        app.active_patient.sessions.push(Session::default());
+        assert!(app.has_unsaved_changes());
+    }
+
+    #[test]
+    fn existing_patient_is_compared_against_saved_data() {
+        let mut app = App::new();
+        let patient = Patient {
+            id: "saved-patient".into(),
+            first_name: "Jean".into(),
+            ..Default::default()
+        };
+        app.patients.push(patient.clone());
+        app.open_patient(patient);
+        assert!(!app.has_unsaved_changes());
+
+        app.active_patient.first_name = "Marie".into();
+        assert!(app.has_unsaved_changes());
+        app.patients[0] = app.active_patient.clone();
+        assert!(!app.has_unsaved_changes());
     }
 }

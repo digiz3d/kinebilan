@@ -20,9 +20,29 @@ Requires Rust (see `mise.toml`) and CMake. SDL3 is built from source.
 cargo run --release
 ```
 
+To run the GPUI-rendered application (in parallel with the SDL version):
+
+```sh
+cargo run --bin gpui_preview
+```
+
+To run the GPUI Kit version with Kit buttons, text inputs, textareas and scrollbars:
+
+```sh
+cargo run --release --features gpui-kit --bin gpui_kit_preview
+```
+
+All three versions share the same encrypted patient file. Run only one at a time to avoid overwriting changes made in another version.
+
+Run the Kit UI and shared model/storage tests with:
+
+```sh
+cargo test --features gpui-kit-tests --bin gpui_kit_preview
+```
+
 ## Data
 
-Patients are stored in `~/.kinebilan/patients.json` (or `./patients.json` if `HOME` is not set).
+Patient data is stored encrypted in `~/.kinebilan/patients.json` (or `./patients.json` if `HOME` is not set) and protected by the password you create on first launch.
 
 ## License
 
