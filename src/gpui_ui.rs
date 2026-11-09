@@ -3,6 +3,10 @@ use gpui::{
     prelude::*, rgb,
 };
 
+#[path = "gpui_ui/common.rs"]
+mod common;
+pub use common::{ButtonStyle, card};
+
 fn scroll_moved(before: gpui::Pixels, after: gpui::Pixels, max: gpui::Pixels) -> bool {
     before.clamp(-max, gpui::px(0.)) != after.clamp(-max, gpui::px(0.))
 }
@@ -74,42 +78,6 @@ pub fn scrollable(
             .bottom(gpui::px(2.))
             .w(gpui::px(4.)),
         )
-}
-
-#[derive(Clone, Copy)]
-pub enum ButtonStyle {
-    Primary,
-    Secondary,
-    Danger,
-    DangerConfirm,
-    Outline,
-}
-
-pub fn card(title: impl Into<SharedString>, content: impl IntoElement) -> impl IntoElement {
-    let title = title.into();
-    let plain = title.is_empty() || title == "__full__";
-    let full = title == "__full__";
-    div()
-        .flex()
-        .flex_col()
-        .gap_3()
-        .when(full, |card| card.h_full())
-        .when(!plain, |card| {
-            card.p_6()
-                .border_1()
-                .border_color(rgb(0xe5e7eb))
-                .bg(rgb(0xffffff))
-        })
-        .when(!plain, |card| {
-            card.child(
-                div()
-                    .text_size(gpui::px(20.))
-                    .font_weight(gpui::FontWeight::BOLD)
-                    .text_color(rgb(0x111827))
-                    .child(title.clone()),
-            )
-        })
-        .child(content)
 }
 
 pub fn form_field(
